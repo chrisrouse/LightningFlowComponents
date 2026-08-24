@@ -23,6 +23,10 @@
         {
             "path": "lightning_page_components",
             "default": false
+        },
+        {
+            "path": "vendor/flow-config-editor-kit/force-app",
+            "default": false
         }
     ],
     "namespace": "",
