@@ -9,8 +9,8 @@
         "test:unit": "sfdx-lwc-jest",
         "test:unit:watch": "sfdx-lwc-jest --watch",
         "test:unit:coverage": "sfdx-lwc-jest --coverage",
-        "prettier": "prettier --write \"flowgrid/**/*.{js,html,css,json}\"",
-        "prettier:verify": "prettier --check \"flowgrid/**/*.{js,html,css,json}\"",
+        "prettier": "prettier --write \"flowgrid/**/*.{js,html,css,json,cls}\"",
+        "prettier:verify": "prettier --check \"flowgrid/**/*.{js,html,css,json,cls}\"",
         "verify": "npm run prettier:verify && npm run lint && npm run test:unit"
     },
     "engines": {
