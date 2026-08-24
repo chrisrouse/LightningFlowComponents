@@ -44,3 +44,11 @@ jsconfig.json
 .lwc/jsconfig.json
 .sf/config.json
 .pmdCache
+
+# --- Flow Grid fork: toolchain files that must be tracked ---
+# Upstream ignores these; this fork ships a real LWC test/lint toolchain, so the
+# Prettier config and the lockfile need to be committed for reproducible installs
+# and consistent formatting (the vendored kit is pinned pre-1.0).
+!.prettierrc
+!.prettierignore
+!package-lock.json

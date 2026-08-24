@@ -5,3 +5,13 @@
 **/tsconfig.json
 
 **/*.ts
+
+# Jest tests and their helpers are never deployable metadata.
+**/__tests__/**
+**/__mocks__/**
+vendor/**/test-utils/**
+
+# Vendored upstream docs/licensing that sit beside deployable metadata.
+vendor/**/VENDOR.md
+vendor/**/LICENSE
+vendor/**/NOTICE
