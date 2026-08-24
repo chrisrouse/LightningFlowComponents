@@ -27,6 +27,10 @@
         {
             "path": "vendor/flow-config-editor-kit/force-app",
             "default": false
+        },
+        {
+            "path": "flowgrid/force-app",
+            "default": false
         }
     ],
     "namespace": "",
