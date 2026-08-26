@@ -284,6 +284,34 @@ function getNestedOutputs(element) {
   return outputs;
 }
 
+/**
+ * FORK PATCH — see VENDOR.md. Names the element type for a CollectionProcessor so
+ * the picker groups it the way the native one does.
+ */
+function collectionProcessorSource(processor) {
+  const subtype = String(processor?.elementSubtype || "");
+  if (subtype.startsWith("Filter")) {
+    return "Collection Filter";
+  }
+  if (subtype.startsWith("Sort")) {
+    return "Collection Sort";
+  }
+  return "Collection Processor";
+}
+
+/**
+ * FORK PATCH — see VENDOR.md. Resolves the object of an already-collected resource
+ * by reference, so a Collection Filter inherits the object of its input collection
+ * when the element itself does not name one.
+ */
+function objectTypeOfReference(resources, reference) {
+  if (!reference) {
+    return null;
+  }
+  const name = String(reference).replace(/^\{!/, "").replace(/\}$/, "");
+  return resources.find((resource) => resource.name === name)?.objectType || null;
+}
+
 function addResource(resources, seen, resource) {
   if (!resource || seen.has(resource.reference)) {
     return;
@@ -403,6 +431,38 @@ export function collectFlowResources(builderContext = {}, apiVersion) {
         isCollection,
         category: "Record Variables"
       })
+    );
+  });
+
+  // FORK PATCH — see vendor/flow-config-editor-kit/VENDOR.md
+  // Collection Filter and Collection Sort. Flow stores both as CollectionProcessor
+  // elements, and each produces a collection of the same object as its input. The
+  // kit enumerated recordLookups and the four ELEMENT_OUTPUT_GROUPS but not these,
+  // so a filtered collection was unreachable from any kit picker even though the
+  // native Flow picker lists it.
+  asArray(builderContext.collectionProcessors).forEach((processor) => {
+    const processorName = processor.name || processor.apiName;
+    if (!processorName) {
+      return;
+    }
+    addResource(
+      resources,
+      seen,
+      normalizeResource(
+        processor,
+        collectionProcessorSource(processor),
+        processorName,
+        {
+          dataType: "SObject",
+          // outputSObjectType is what CollectionProcessor carries; the rest are
+          // fallbacks, ending in the object of whatever collection it was given.
+          objectType:
+            processor.outputSObjectType ||
+            objectTypeOfReference(resources, processor.collectionReference),
+          isCollection: true,
+          category: "Record Variables"
+        }
+      )
     );
   });
 

@@ -41,3 +41,32 @@ sf org assign permset --name Flow_Config_Editor_Access -o "Preview Org"
 `Flow_Config_Editor_Access` grants the Apex controller and Visualforce bridge used for
 Apex-defined-type and hierarchy-setting discovery. Flow Grid does not currently use
 either, but the permission set is part of the kit's supported install.
+
+## Fork patches
+
+The vendored tree was previously unmodified, for diffability against the pinned
+commit. It no longer is. Every change is marked in-source with `FORK PATCH` and
+listed here, so a future re-pin knows exactly what to re-apply.
+
+### 1. Collection Filter and Collection Sort outputs — 2026-08-26
+
+`flowConfigEditorUtils.collectFlowResources` enumerated `recordLookups` and the four
+`ELEMENT_OUTPUT_GROUPS` (actionCalls, apexPluginCalls, subflows, screens) but not
+`collectionProcessors`. Flow stores **Collection Filter** and **Collection Sort** as
+`CollectionProcessor` elements, so their output collections were invisible to every
+kit picker — while Flow's own native picker lists them under their element type.
+
+The symptom: a Get Records collection could be selected but a filtered version of it
+could not, which makes "get everything, filter it, show the result" impossible to
+wire without an extra Assignment.
+
+Added: enumeration of `builderContext.collectionProcessors`, taking the object from
+`outputSObjectType` and falling back to the object of the collection named in
+`collectionReference`, always marked `isCollection`. Grouped as "Collection Filter"
+or "Collection Sort" from `elementSubtype`, matching the native picker's grouping.
+
+Covered by `flowConfigEditorUtils/__tests__/collectionProcessors.test.js`, which is
+also a fork addition.
+
+**Worth reporting upstream.** This is a gap in the kit rather than anything specific
+to Flow Grid, and the patch is small enough to contribute back.
