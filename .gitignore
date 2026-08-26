@@ -42,6 +42,10 @@ $RECYCLE.BIN/
 package-lock.json
 jsconfig.json
 .lwc/jsconfig.json
+# Generated per-LWC-folder TypeScript config, same category as jsconfig.json above.
+# The Salesforce VS Code extension writes one into every lwc/ directory in the repo
+# — ~150 of them — which otherwise buries any real diff.
+tsconfig.json
 .sf/config.json
 .pmdCache
 
