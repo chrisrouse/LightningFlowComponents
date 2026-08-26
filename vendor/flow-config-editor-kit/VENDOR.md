@@ -75,6 +75,12 @@ category falls to index 999 and sorts below Global Variables) and in
 collection — the group header already says which element produced it, so a different
 glyph would imply the value differs in kind, which it does not.
 
+Ordered **ahead of** "Record Variables", because the native picker lists Screen, then
+Collection Filter, then Get Records — and the kit keeps Get Records outputs inside
+"Record Variables". Exact parity with the native grouping would also mean splitting
+Get Records out of "Record Variables" into its own group, which is a wider change to
+the kit's grouping than this gap warrants and would affect every consumer.
+
 Covered by `flowConfigEditorUtils/__tests__/collectionProcessors.test.js` and
 `flowConfigResourceModel/__tests__/collectionProcessorGrouping.test.js`, both fork
 additions.

@@ -19,13 +19,15 @@ export const CATEGORY_ORDER = [
   "Choices",
   "Constants",
   "Formulas",
-  "Record Variables",
   // FORK PATCH — see VENDOR.md. Collection Filter and Collection Sort get their own
-  // groups, the way Flow's native picker labels them by element type. Placed next to
-  // Record Variables because that is what they are; without an entry here an unknown
-  // category sorts to the very bottom, below Global Variables.
+  // groups, the way Flow's native picker labels them by element type. Ordered AHEAD
+  // of Record Variables to match the native picker, which lists Screen, then
+  // Collection Filter, then Get Records — and the kit keeps Get Records outputs in
+  // Record Variables. Without an entry here at all, an unknown category sorts to the
+  // very bottom, below Global Variables.
   "Collection Filter",
   "Collection Sort",
+  "Record Variables",
   "Simple Variables",
   "Apex-Defined Variables",
   "Text Templates",
