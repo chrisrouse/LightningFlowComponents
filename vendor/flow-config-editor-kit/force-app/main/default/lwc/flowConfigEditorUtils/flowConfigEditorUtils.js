@@ -441,7 +441,7 @@ export function collectFlowResources(builderContext = {}, apiVersion) {
   // so a filtered collection was unreachable from any kit picker even though the
   // native Flow picker lists it.
   asArray(builderContext.collectionProcessors).forEach((processor) => {
-    const processorName = processor.name || processor.apiName;
+    const processorName = processor?.name || processor?.apiName;
     if (!processorName) {
       return;
     }

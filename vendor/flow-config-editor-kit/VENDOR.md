@@ -88,5 +88,21 @@ additions.
 Verified in the org 2026-08-26: a Collection Filter output now appears in the kit's
 resource picker with the right object and collection flag.
 
-**Worth reporting upstream.** This is a gap in the kit rather than anything specific
-to Flow Grid, and the patch is small enough to contribute back.
+**Submitted upstream — branch ready, PR not yet opened (2026-08-26).**
+
+Fork: `chrisrouse/flow-config-editor-kit`, branch
+`feat/collection-processor-resources`, based on `6443e41d` (upstream `main`, and our
+pin — identical, so the diff is exactly this patch). PR body drafted in that clone as
+`PR_DRAFT.md`. Open at:
+<https://github.com/RebbePod/flow-config-editor-kit/compare/main...chrisrouse:feat/collection-processor-resources>
+
+The upstream version is the same change without the `FORK PATCH` markers, with its
+tests appended to the kit's existing per-component suites rather than new files, and
+with a line added to `docs/ARCHITECTURE.md`. It passes the kit's own `npm run verify`
+(191 tests) and `npm run check:api-version`.
+
+**When it merges, drop this patch and re-pin** rather than carrying both.
+
+**One bug the upstream test run found, now fixed in both copies:** a `null` entry in
+`collectionProcessors` threw, because `processor.name` dereferenced it. `asArray`
+guards a non-array, not null members. Now `processor?.name`.
