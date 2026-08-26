@@ -460,7 +460,10 @@ export function collectFlowResources(builderContext = {}, apiVersion) {
             processor.outputSObjectType ||
             objectTypeOfReference(resources, processor.collectionReference),
           isCollection: true,
-          category: "Record Variables"
+          // Its own group, named for the element, which is how the native picker
+          // presents these. Grouping under Record Variables made a filtered
+          // collection indistinguishable from the Get Records it was filtering.
+          category: collectionProcessorSource(processor)
         }
       )
     );

@@ -25,6 +25,8 @@ describe("collectFlowResources with collection processors", () => {
         expect(filtered.dataType).toBe("SObject");
         expect(filtered.objectType).toBe("Account");
         expect(filtered.isCollection).toBe(true);
+        // Its own group, so it is distinguishable from the Get Records it filters.
+        expect(filtered.category).toBe("Collection Filter");
     });
 
     it("inherits the object from its input when the element does not name one", () => {
@@ -50,8 +52,8 @@ describe("collectFlowResources with collection processors", () => {
             ]
         });
 
-        expect(resources.find((r) => r.name === "Sorted").source).toBe("Collection Sort");
-        expect(resources.find((r) => r.name === "Filtered").source).toBe("Collection Filter");
+        expect(resources.find((r) => r.name === "Sorted").category).toBe("Collection Sort");
+        expect(resources.find((r) => r.name === "Filtered").category).toBe("Collection Filter");
     });
 
     it("skips a processor with no name rather than throwing", () => {

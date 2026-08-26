@@ -65,8 +65,22 @@ Added: enumeration of `builderContext.collectionProcessors`, taking the object f
 `collectionReference`, always marked `isCollection`. Grouped as "Collection Filter"
 or "Collection Sort" from `elementSubtype`, matching the native picker's grouping.
 
-Covered by `flowConfigEditorUtils/__tests__/collectionProcessors.test.js`, which is
-also a fork addition.
+Grouped under their own category — "Collection Filter" / "Collection Sort" — rather
+than lumped in with "Record Variables", because that is how Flow's native picker
+presents them and because a filtered collection was otherwise indistinguishable from
+the Get Records it was filtering. That needed a second file:
+`flowConfigResourceModel.js` gains both names in `CATEGORY_ORDER` (an unknown
+category falls to index 999 and sorts below Global Variables) and in
+`CATEGORY_ICONS`, mapped to the same `utility:record_alt` as any other record
+collection — the group header already says which element produced it, so a different
+glyph would imply the value differs in kind, which it does not.
+
+Covered by `flowConfigEditorUtils/__tests__/collectionProcessors.test.js` and
+`flowConfigResourceModel/__tests__/collectionProcessorGrouping.test.js`, both fork
+additions.
+
+Verified in the org 2026-08-26: a Collection Filter output now appears in the kit's
+resource picker with the right object and collection flag.
 
 **Worth reporting upstream.** This is a gap in the kit rather than anything specific
 to Flow Grid, and the patch is small enough to contribute back.

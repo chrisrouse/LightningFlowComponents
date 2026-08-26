@@ -20,6 +20,12 @@ export const CATEGORY_ORDER = [
   "Constants",
   "Formulas",
   "Record Variables",
+  // FORK PATCH — see VENDOR.md. Collection Filter and Collection Sort get their own
+  // groups, the way Flow's native picker labels them by element type. Placed next to
+  // Record Variables because that is what they are; without an entry here an unknown
+  // category sorts to the very bottom, below Global Variables.
+  "Collection Filter",
+  "Collection Sort",
   "Simple Variables",
   "Apex-Defined Variables",
   "Text Templates",
@@ -38,6 +44,11 @@ export const CATEGORY_ICONS = {
   Constants: "utility:toggle",
   Formulas: "utility:number_input",
   "Record Variables": "utility:record_alt",
+  // FORK PATCH — the same record icon as any other record collection. The group
+  // header already says which element produced it, so a different glyph would only
+  // imply the VALUE differs in kind, which it does not.
+  "Collection Filter": "utility:record_alt",
+  "Collection Sort": "utility:record_alt",
   "Simple Variables": "utility:variable",
   "Apex-Defined Variables": "utility:apex",
   "Text Templates": "utility:text_template",
