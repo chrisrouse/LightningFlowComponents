@@ -6,8 +6,8 @@ License: Apache-2.0 (see `LICENSE`, `NOTICE`)
 ## Pinned commit
 
 ```
-6443e41ddb93aad4be51dbf07983770ddd4c8288
-2026-08-12  fix: rebalance documentation site layout (#22)
+1377405378f2fddb8534666fd9c6adb0cbbebcf1
+2026-08-26  feat: offer Collection Filter and Collection Sort outputs as resources (#23)
 ```
 
 Upstream has no tagged releases. Version in its `package.json` is `0.1.0` (unreleased).
@@ -44,64 +44,34 @@ either, but the permission set is part of the kit's supported install.
 
 ## Fork patches
 
-The vendored tree was previously unmodified, for diffability against the pinned
-commit. It no longer is. Every change is marked in-source with `FORK PATCH` and
-listed here, so a future re-pin knows exactly what to re-apply.
+**None. The tree is byte-identical to the pinned commit**, which is how it should stay
+— a clean tree is diffable against upstream and costs nothing to re-pin.
 
-### 1. Collection Filter and Collection Sort outputs — 2026-08-26
+### History: the Collection Filter gap, contributed and merged
 
-`flowConfigEditorUtils.collectFlowResources` enumerated `recordLookups` and the four
-`ELEMENT_OUTPUT_GROUPS` (actionCalls, apexPluginCalls, subflows, screens) but not
-`collectionProcessors`. Flow stores **Collection Filter** and **Collection Sort** as
-`CollectionProcessor` elements, so their output collections were invisible to every
-kit picker — while Flow's own native picker lists them under their element type.
-
+`collectFlowResources` enumerated `recordLookups` and the four `ELEMENT_OUTPUT_GROUPS`
+but not `collectionProcessors`, so **Collection Filter** and **Collection Sort** output
+collections were invisible to every kit picker while Flow's own picker listed them.
 The symptom: a Get Records collection could be selected but a filtered version of it
-could not, which makes "get everything, filter it, show the result" impossible to
-wire without an extra Assignment.
+could not, making "get everything, filter it, show the result" impossible to wire
+without an extra Assignment.
 
-Added: enumeration of `builderContext.collectionProcessors`, taking the object from
-`outputSObjectType` and falling back to the object of the collection named in
-`collectionReference`, always marked `isCollection`. Grouped as "Collection Filter"
-or "Collection Sort" from `elementSubtype`, matching the native picker's grouping.
+Patched locally 2026-08-26, contributed, and **merged upstream as #23** — which is now
+the pinned commit, so the fork patches are gone and the tree is clean again.
 
-Grouped under their own category — "Collection Filter" / "Collection Sort" — rather
-than lumped in with "Record Variables", because that is how Flow's native picker
-presents them and because a filtered collection was otherwise indistinguishable from
-the Get Records it was filtering. That needed a second file:
-`flowConfigResourceModel.js` gains both names in `CATEGORY_ORDER` (an unknown
-category falls to index 999 and sorts below Global Variables) and in
-`CATEGORY_ICONS`, mapped to the same `utility:record_alt` as any other record
-collection — the group header already says which element produced it, so a different
-glyph would imply the value differs in kind, which it does not.
+**The merged version is better than the one contributed, and the difference is worth
+knowing.** The local patch resolved a processor's object by looking up the collection
+it consumed among the resources already collected. During review that became a
+complete name map with cycle protection:
 
-Ordered **ahead of** "Record Variables", because the native picker lists Screen, then
-Collection Filter, then Get Records — and the kit keeps Get Records outputs inside
-"Record Variables". Exact parity with the native grouping would also mean splitting
-Get Records out of "Record Variables" into its own group, which is a wider change to
-the kit's grouping than this gap warrants and would affect every consumer.
+- **ours** — searched already-collected resources, so it depended on Flow emitting
+  processors in dependency order, and a Collection Filter fed by another Collection
+  Filter would not resolve.
+- **upstream** — resolves through `processorsByName` regardless of array order, follows
+  chains, and carries a `resolving` set so a cycle cannot recurse.
 
-Covered by `flowConfigEditorUtils/__tests__/collectionProcessors.test.js` and
-`flowConfigResourceModel/__tests__/collectionProcessorGrouping.test.js`, both fork
-additions.
-
-Verified in the org 2026-08-26: a Collection Filter output now appears in the kit's
-resource picker with the right object and collection flag.
-
-**Submitted upstream — branch ready, PR not yet opened (2026-08-26).**
-
-Fork: `chrisrouse/flow-config-editor-kit`, branch
-`feat/collection-processor-resources`, based on `6443e41d` (upstream `main`, and our
-pin — identical, so the diff is exactly this patch). PR body drafted in that clone as
-`PR_DRAFT.md`. Open at:
-<https://github.com/RebbePod/flow-config-editor-kit/compare/main...chrisrouse:feat/collection-processor-resources>
-
-The upstream version is the same change without the `FORK PATCH` markers, with its
-tests appended to the kit's existing per-component suites rather than new files, and
-with a line added to `docs/ARCHITECTURE.md`. It passes the kit's own `npm run verify`
-(191 tests) and `npm run check:api-version`.
-
-**When it merges, drop this patch and re-pin** rather than carrying both.
+Anything relying on chained processors gets that for free by re-pinning; carrying the
+local version would have kept the weaker resolution indefinitely.
 
 **One bug the upstream test run found, now fixed in both copies:** a `null` entry in
 `collectionProcessors` threw, because `processor.name` dereferenced it. `asArray`

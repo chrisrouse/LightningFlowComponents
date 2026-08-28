@@ -19,12 +19,6 @@ export const CATEGORY_ORDER = [
   "Choices",
   "Constants",
   "Formulas",
-  // FORK PATCH — see VENDOR.md. Collection Filter and Collection Sort get their own
-  // groups, the way Flow's native picker labels them by element type. Ordered AHEAD
-  // of Record Variables to match the native picker, which lists Screen, then
-  // Collection Filter, then Get Records — and the kit keeps Get Records outputs in
-  // Record Variables. Without an entry here at all, an unknown category sorts to the
-  // very bottom, below Global Variables.
   "Collection Filter",
   "Collection Sort",
   "Record Variables",
@@ -46,9 +40,6 @@ export const CATEGORY_ICONS = {
   Constants: "utility:toggle",
   Formulas: "utility:number_input",
   "Record Variables": "utility:record_alt",
-  // FORK PATCH — the same record icon as any other record collection. The group
-  // header already says which element produced it, so a different glyph would only
-  // imply the VALUE differs in kind, which it does not.
   "Collection Filter": "utility:record_alt",
   "Collection Sort": "utility:record_alt",
   "Simple Variables": "utility:variable",

@@ -284,10 +284,7 @@ function getNestedOutputs(element) {
   return outputs;
 }
 
-/**
- * FORK PATCH — see VENDOR.md. Names the element type for a CollectionProcessor so
- * the picker groups it the way the native one does.
- */
+/** Element type of a CollectionProcessor, used as its picker group. */
 function collectionProcessorSource(processor) {
   const subtype = String(processor?.elementSubtype || "");
   if (subtype.startsWith("Filter")) {
@@ -300,16 +297,45 @@ function collectionProcessorSource(processor) {
 }
 
 /**
- * FORK PATCH — see VENDOR.md. Resolves the object of an already-collected resource
- * by reference, so a Collection Filter inherits the object of its input collection
- * when the element itself does not name one.
+ * Resolves a CollectionProcessor's output object through the collection it
+ * consumes. Flow doesn't guarantee processor array order, so chained processors
+ * are followed through the complete name map instead of only previously added
+ * resources.
  */
-function objectTypeOfReference(resources, reference) {
-  if (!reference) {
+function collectionProcessorObjectType(
+  processor,
+  processorsByName,
+  objectTypesByName,
+  resolving = new Set()
+) {
+  const processorName = processor?.name || processor?.apiName;
+  const declaredObjectType = typeToken(processor?.outputSObjectType);
+  if (declaredObjectType) {
+    if (processorName) {
+      objectTypesByName.set(processorName, declaredObjectType);
+    }
+    return declaredObjectType;
+  }
+  if (!processorName || resolving.has(processorName)) {
     return null;
   }
-  const name = String(reference).replace(/^\{!/, "").replace(/\}$/, "");
-  return resources.find((resource) => resource.name === name)?.objectType || null;
+
+  resolving.add(processorName);
+  const inputName = fromFlowReference(processor.collectionReference);
+  const objectType =
+    objectTypesByName.get(inputName) ||
+    collectionProcessorObjectType(
+      processorsByName.get(inputName),
+      processorsByName,
+      objectTypesByName,
+      resolving
+    );
+  resolving.delete(processorName);
+
+  if (objectType) {
+    objectTypesByName.set(processorName, objectType);
+  }
+  return objectType || null;
 }
 
 function addResource(resources, seen, resource) {
@@ -434,13 +460,20 @@ export function collectFlowResources(builderContext = {}, apiVersion) {
     );
   });
 
-  // FORK PATCH — see vendor/flow-config-editor-kit/VENDOR.md
   // Collection Filter and Collection Sort. Flow stores both as CollectionProcessor
-  // elements, and each produces a collection of the same object as its input. The
-  // kit enumerated recordLookups and the four ELEMENT_OUTPUT_GROUPS but not these,
-  // so a filtered collection was unreachable from any kit picker even though the
-  // native Flow picker lists it.
-  asArray(builderContext.collectionProcessors).forEach((processor) => {
+  // elements, each producing a collection of the same object as its input.
+  const collectionProcessors = asArray(builderContext.collectionProcessors);
+  const processorsByName = new Map(
+    collectionProcessors
+      .filter((processor) => processor?.name || processor?.apiName)
+      .map((processor) => [processor.name || processor.apiName, processor])
+  );
+  const objectTypesByName = new Map(
+    resources
+      .filter((resource) => resource.name && resource.objectType)
+      .map((resource) => [resource.name, resource.objectType])
+  );
+  collectionProcessors.forEach((processor) => {
     const processorName = processor?.name || processor?.apiName;
     if (!processorName) {
       return;
@@ -454,15 +487,15 @@ export function collectFlowResources(builderContext = {}, apiVersion) {
         processorName,
         {
           dataType: "SObject",
-          // outputSObjectType is what CollectionProcessor carries; the rest are
-          // fallbacks, ending in the object of whatever collection it was given.
-          objectType:
-            processor.outputSObjectType ||
-            objectTypeOfReference(resources, processor.collectionReference),
+          // A CollectionProcessor names its output object directly; older or
+          // partial metadata may not, so fall back to the object of the
+          // collection it was given, including through chained processors.
+          objectType: collectionProcessorObjectType(
+            processor,
+            processorsByName,
+            objectTypesByName
+          ),
           isCollection: true,
-          // Its own group, named for the element, which is how the native picker
-          // presents these. Grouping under Record Variables made a filtered
-          // collection indistinguishable from the Get Records it was filtering.
           category: collectionProcessorSource(processor)
         }
       )
