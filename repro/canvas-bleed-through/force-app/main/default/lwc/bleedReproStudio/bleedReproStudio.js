@@ -1,20 +1,27 @@
 /**
  * A custom modal rendered from inside a Flow Builder property editor.
  *
- * THE PROBLEM. Flow Builder wraps the property panel in transformed ancestors. A
- * transform creates a new stacking context, so a z-index on anything inside this
- * component is scoped to that ancestor and cannot outrank the screen canvas beside
- * it. Elevating the component HOST is the documented workaround and is applied
- * below — and the canvas's selected-element chip and its Move/Delete buttons STILL
- * paint over this modal.
+ * WHAT IS KNOWN. A pure SLDS modal here does NOT reproduce the bleed. So the cause
+ * is in what the real component adds on top, and every addition is a toggle set from
+ * the editor rather than baked in — see the `candidates` property.
  *
- * Measured in the real component with a shadow-piercing walk: the modal resolved to
- * z-index 1000000 and the canvas highlight to 5, both inside the SAME stacking
- * context, with no intervening stacking context on either branch. The modal already
- * won the paint order outright, which is why three attempts at fixing it by stacking
- * or by an opaque backdrop all failed.
+ * Everything is applied as an INLINE STYLE from JS rather than from a stylesheet, so
+ * there is exactly one mechanism to reason about and the CSS file stays empty.
+ *
+ * TWO TRIGGERS, not just styles. The recorded reproduction was a SEQUENCE — select a
+ * component on the canvas, open and close a picker, then reopen the modal — so the
+ * bleed may be latent until something forces a repaint. The two buttons at the bottom
+ * of the modal simulate that:
+ *
+ *   Simulate picker open/close  elevates a nested host and then RESETS it, which is
+ *                               what the kit's popover helper does on close. If a
+ *                               reset clears elevation the modal still depends on,
+ *                               that is the bug.
+ *   Simulate async re-render    re-renders after a tick, standing in for the Apex
+ *                               metadata and preview loads the real Studio performs
+ *                               after opening.
  */
-import { LightningElement } from "lwc";
+import { LightningElement, api } from "lwc";
 
 const COLUMNS = [
     { label: "Account Name", fieldName: "name" },
@@ -31,37 +38,66 @@ const ROWS = [
 ];
 
 export default class BleedReproStudio extends LightningElement {
+    /** Candidate keys chosen in the editor. Nothing is applied unless listed here. */
+    @api candidates = [];
+
     columns = COLUMNS;
     rows = ROWS;
     repaintCount = 0;
-    choice = "one";
+    pickerElevated = false;
 
-    options = [
+    comboOptions = [
         { label: "One", value: "one" },
         { label: "Two", value: "two" }
     ];
 
-    connectedCallback() {
-        // Host elevation. Two lines, inlined rather than imported, so this repro has
-        // no dependencies. This is the documented workaround for a component that has
-        // to escape a transformed ancestor's stacking context, and it is not enough.
-        const host = this.template.host;
-        host.style.position = "relative";
-        host.style.zIndex = "1000000";
+    /** Reads back which candidates are live, so a screenshot is self-describing. */
+    get appliedSummary() {
+        return this.candidates.length ? this.candidates.join(", ") : "none — plain SLDS modal";
     }
 
-    disconnectedCallback() {
+    get isTall() {
+        return this.candidates.includes("tallSubtree");
+    }
+
+    /** Filler rows, only to make the modal taller than the viewport. */
+    get fillerRows() {
+        return Array.from({ length: 40 }, (unused, index) => ({ key: `filler-${index}`, label: `Row ${index + 1}` }));
+    }
+
+    /**
+     * Applied on every render, setting or CLEARING each property explicitly so it is
+     * idempotent and a toggle turning off really does remove its effect.
+     */
+    renderedCallback() {
+        const on = (candidate) => this.candidates.includes(candidate);
+
         const host = this.template.host;
-        host.style.position = "";
-        host.style.zIndex = "";
+        host.style.position = on("hostElevation") ? "relative" : "";
+        host.style.zIndex = on("hostElevation") ? "1000000" : "";
+
+        const section = this.template.querySelector(".studio");
+        if (section) {
+            section.style.zIndex = on("modalZIndex") ? "99999" : "";
+            section.style.backgroundColor = on("modalZIndex") ? "#e5e5e5" : "";
+        }
+
+        const container = this.template.querySelector(".studio__container");
+        if (container) {
+            container.style.width = on("wideContainer") ? "92vw" : "";
+            container.style.maxWidth = on("wideContainer") ? "92vw" : "";
+            container.style.minWidth = on("wideContainer") ? "60rem" : "";
+        }
+
+        const content = this.template.querySelector(".studio__content");
+        if (content) {
+            content.style.maxHeight = on("clippedContent") ? "74vh" : "";
+            content.style.overflow = on("clippedContent") ? "hidden" : "";
+        }
     }
 
     handleClose() {
         this.dispatchEvent(new CustomEvent("close"));
-    }
-
-    handleChoice(event) {
-        this.choice = event.detail.value;
     }
 
     handleRepaint() {
@@ -69,16 +105,40 @@ export default class BleedReproStudio extends LightningElement {
     }
 
     /**
-     * OPTIONAL DIAGNOSTIC — delete this and its button if it is noise.
+     * Elevates a nested host and then resets it, exactly as the kit's popover helper
+     * does — `host.style.position = ""` and `host.style.zIndex = ""` on close.
      *
-     * Arms a one-shot capture listener. The next click is swallowed and, instead of
-     * acting, the element stack at those coordinates is written to the console:
-     * every element from the top down, piercing shadow roots, then the ancestors of
-     * the topmost one with the properties that decide paint order.
-     *
-     * This exists because the stacking measurement says the canvas chip should not be
-     * able to paint above the modal. Naming the element that actually is, rather than
-     * assuming it is the chip, is the open question.
+     * The interesting case is the reset, not the elevation: a helper that clears
+     * inline styles cannot know whether something else was relying on them.
+     */
+    handleSimulatePicker() {
+        const picker = this.template.querySelector(".picker");
+        if (!picker) {
+            return;
+        }
+        picker.style.position = "relative";
+        picker.style.zIndex = "1000000";
+        this.pickerElevated = true;
+
+        window.setTimeout(() => {
+            picker.style.position = "";
+            picker.style.zIndex = "";
+            this.pickerElevated = false;
+        }, 1200);
+    }
+
+    /** Stands in for the Apex loads the real Studio fires after opening. */
+    handleAsyncRerender() {
+        window.setTimeout(() => {
+            this.rows = [...this.rows];
+            this.repaintCount += 1;
+        }, 400);
+    }
+
+    /**
+     * OPTIONAL DIAGNOSTIC. Swallows the next click and logs the element stack at those
+     * coordinates: down through shadow roots to whatever is on top, then up through the
+     * ancestors that decide paint order.
      */
     handleArmHitTest() {
         document.addEventListener("click", this.hitTest, { capture: true, once: true });
@@ -98,7 +158,6 @@ export default class BleedReproStudio extends LightningElement {
             ].join("");
         };
 
-        // Down through the shadow roots, to whatever is actually on top.
         const stack = [];
         let element = document.elementFromPoint(event.clientX, event.clientY);
         while (element) {
@@ -110,7 +169,6 @@ export default class BleedReproStudio extends LightningElement {
             element = inner;
         }
 
-        // Then up from it, because the stacking context is an ancestor's doing.
         const ancestors = [];
         let parent = element?.parentElement || element?.getRootNode?.()?.host;
         while (parent && ancestors.length < 15) {

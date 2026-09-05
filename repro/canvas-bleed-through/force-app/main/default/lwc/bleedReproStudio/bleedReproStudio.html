@@ -1,6 +1,6 @@
 <template>
-    <!-- No slds-backdrop element, matching the real component: the tint comes from
-         the background-color on .studio instead. -->
+    <!-- No slds-backdrop element, matching the real component: when candidate 3 is on,
+         the tint is a background-color on this section instead. -->
     <section
         role="dialog"
         tabindex="-1"
@@ -11,35 +11,46 @@
         <div class="slds-modal__container studio__container">
             <header class="slds-modal__header">
                 <h1 id="studio-heading" class="slds-modal__title slds-hyphenate">Studio Modal</h1>
+                <p class="slds-text-body_small slds-m-top_xx-small">Candidates applied: {appliedSummary}</p>
             </header>
 
             <div class="slds-modal__content slds-p-around_medium studio__content">
                 <p class="slds-text-body_small slds-m-bottom_small">
-                    The canvas chip and its Move/Delete buttons for the selected element appear ON TOP of this modal.
-                    Clicking the buttons below forces repaints, which is when the order becomes obvious.
+                    Looking for the canvas chip and its Move/Delete buttons painting OVER this modal. The recorded
+                    trigger was a sequence, not a static state — try the two simulate buttons if nothing shows
+                    immediately.
                 </p>
 
                 <div class="slds-m-bottom_medium">
+                    <lightning-button
+                        label="Simulate picker open/close"
+                        class="slds-m-right_x-small"
+                        onclick={handleSimulatePicker}
+                    ></lightning-button>
+                    <lightning-button
+                        label="Simulate async re-render"
+                        class="slds-m-right_x-small"
+                        onclick={handleAsyncRerender}
+                    ></lightning-button>
                     <lightning-button
                         label="Force a repaint"
                         class="slds-m-right_x-small"
                         onclick={handleRepaint}
                     ></lightning-button>
                     <lightning-button label="Identify element at click" onclick={handleArmHitTest}></lightning-button>
-                    <span class="slds-m-left_small slds-text-body_small slds-text-color_weak">
-                        Repaints: {repaintCount}
-                    </span>
                 </div>
 
-                <!-- Focusing and blurring a combobox is the interaction that first exposed
-                     the paint order in the real component. -->
-                <lightning-combobox
-                    label="Focus and blur this"
-                    value={choice}
-                    options={options}
-                    onchange={handleChoice}
-                    class="slds-m-bottom_medium"
-                ></lightning-combobox>
+                <!-- The element the picker simulation elevates and then resets. -->
+                <div class="picker slds-m-bottom_medium">
+                    <lightning-combobox
+                        label="Stands in for a kit picker — focus and blur it"
+                        value="one"
+                        options={comboOptions}
+                    ></lightning-combobox>
+                    <template lwc:if={pickerElevated}>
+                        <p class="slds-text-body_small slds-text-color_success">Host elevated…</p>
+                    </template>
+                </div>
 
                 <lightning-datatable
                     key-field="id"
@@ -47,6 +58,14 @@
                     data={rows}
                     hide-checkbox-column
                 ></lightning-datatable>
+
+                <template lwc:if={isTall}>
+                    <ul class="slds-m-top_medium">
+                        <template for:each={fillerRows} for:item="filler">
+                            <li key={filler.key} class="slds-p-vertical_x-small slds-border_bottom">{filler.label}</li>
+                        </template>
+                    </ul>
+                </template>
             </div>
 
             <footer class="slds-modal__footer">
