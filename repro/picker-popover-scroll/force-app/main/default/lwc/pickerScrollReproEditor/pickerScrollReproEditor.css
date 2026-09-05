@@ -1,0 +1,8 @@
+/* The only CSS in the project. A scroll container, guaranteed to overflow, so the
+   repro does not depend on the property panel being tall enough to scroll. */
+.scroller {
+    max-height: 12rem;
+    overflow-y: auto;
+    border: 1px solid #c9c9c9;
+    padding: 0.5rem;
+}

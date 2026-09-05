@@ -1,0 +1,29 @@
+<template>
+    <div class="slds-p-around_small">
+        <p class="slds-text-body_small slds-m-bottom_x-small">
+            <strong>Steps.</strong> Open the <em>Resource</em> picker below so its dropdown appears, then scroll this
+            bordered box with the dropdown still open. The popover stays where it was drawn while its input scrolls
+            away.
+        </p>
+        <p class="slds-text-body_small slds-m-bottom_small slds-text-color_weak">
+            The box is a plain <code>overflow-y: auto</code> container in this component's own shadow root — the same
+            shape as any consumer that puts a picker in a scrolling panel.
+        </p>
+
+        <div class="scroller">
+            <c-flow-config-resource-picker
+                label="Resource"
+                property-name="resourceValue"
+                value={resourceValue}
+                collection="any"
+                builder-context={builderContext}
+                automatic-output-variables={automaticOutputVariables}
+                onresourcechange={handleResource}
+            ></c-flow-config-resource-picker>
+
+            <template for:each={filler} for:item="row">
+                <p key={row.key} class="slds-p-vertical_x-small slds-text-body_small">{row.label}</p>
+            </template>
+        </div>
+    </div>
+</template>
