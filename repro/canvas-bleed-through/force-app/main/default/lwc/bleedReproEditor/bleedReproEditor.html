@@ -2,14 +2,20 @@
     <div class="slds-p-around_small">
         <p class="slds-text-body_small slds-m-bottom_small">
             Select this element on the canvas first, so the canvas draws its chip and its Move/Delete buttons. Then open
-            the modal and look for the chip or the connector lines painting over it.
+            the modal, click <strong>Measure Width</strong>, and check the console.
         </p>
 
         <lightning-button
             variant="brand"
-            label="Open Studio Modal"
+            label="Open at Medium"
             aria-haspopup="dialog"
-            onclick={handleOpen}
+            onclick={handleOpenMedium}
+            class="slds-m-right_x-small"
+        ></lightning-button>
+        <lightning-button
+            label="Open at Large"
+            aria-haspopup="dialog"
+            onclick={handleOpenLarge}
         ></lightning-button>
     </div>
 </template>

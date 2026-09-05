@@ -1,14 +1,17 @@
 /**
  * Flow Builder custom property editor.
  *
- * Opens the Studio modal. The modal is a native SLDS 2 `lightning/modal`, opened at
- * size medium, with no custom CSS anywhere in this project.
+ * Opens the Studio modal as a native SLDS 2 `lightning/modal`.
  *
- * The previous revision of this repro hand-rolled `slds-modal` markup inside this
- * editor's own DOM, and reproduced the bleed with every custom style commented out.
- * `lightning/modal` renders in the platform's overlay container instead, outside the
- * property panel's subtree, so this build isolates whether the bleed comes from the
- * modal living inside Flow Builder's transformed panel ancestors.
+ * The hand-rolled `slds-modal` revision of this repro rendered inside this editor's
+ * own DOM and bled with every custom style removed. The native modal renders in the
+ * platform's overlay container instead, outside the property panel's transformed
+ * ancestors, and does not bleed -- at medium or at large.
+ *
+ * What is left to establish is width. The real component is 92vw with a 60rem floor,
+ * and the platform caps at `large` on desktop (`full` behaves as `large` above 30em).
+ * Both buttons below open the same two-pane content so the two sizes can be compared
+ * against what the content actually asks for.
  */
 import { LightningElement, api } from "lwc";
 import BleedReproStudio from "c/bleedReproStudio";
@@ -17,11 +20,18 @@ export default class BleedReproEditor extends LightningElement {
     @api inputVariables = [];
     @api builderContext = {};
 
-    result;
+    async handleOpenMedium() {
+        await this.openAt("medium");
+    }
 
-    async handleOpen() {
-        this.result = await BleedReproStudio.open({
-            size: "medium",
+    async handleOpenLarge() {
+        await this.openAt("large");
+    }
+
+    async openAt(size) {
+        await BleedReproStudio.open({
+            size,
+            sizeLabel: size,
             description: "Studio Modal, a repro for canvas content painting over a modal"
         });
     }

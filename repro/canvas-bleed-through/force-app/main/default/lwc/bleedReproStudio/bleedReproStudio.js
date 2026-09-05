@@ -15,6 +15,7 @@
  * There is NO stylesheet in this bundle. Size comes from `size: "medium"` passed to
  * open(), not from a width override.
  */
+import { api } from "lwc";
 import LightningModal from "lightning/modal";
 
 const COLUMNS = [
@@ -32,8 +33,12 @@ const ROWS = [
 ];
 
 export default class BleedReproStudio extends LightningModal {
+    /** Echoed into the body so a screenshot says which size it was. */
+    @api sizeLabel = "medium";
+
     columns = COLUMNS;
     rows = ROWS;
+    measurement = "";
 
     comboOptions = [
         { label: "One", value: "one" },
@@ -42,6 +47,38 @@ export default class BleedReproStudio extends LightningModal {
 
     handleClose() {
         this.close("closed");
+    }
+
+    /**
+     * Walks up from the two-pane wrapper through every shadow root to the document,
+     * reporting each ancestor's width. The question is whether the platform's modal
+     * container grew to the 60rem the content asked for, or capped and let the
+     * content overflow.
+     */
+    handleMeasure() {
+        const pane = this.template.querySelector(".two-pane");
+        if (!pane) {
+            return;
+        }
+
+        const chain = [];
+        let node = pane;
+        while (node && node !== document.body) {
+            chain.push(`${node.tagName.toLowerCase()}: ${Math.round(node.getBoundingClientRect().width)}px`);
+            node = node.parentElement || node.getRootNode?.()?.host;
+        }
+
+        const paneWidth = Math.round(pane.getBoundingClientRect().width);
+        const asked = 60 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+        this.measurement =
+            `two-pane ${paneWidth}px vs ${Math.round(asked)}px asked; viewport ${window.innerWidth}px` +
+            (paneWidth + 1 < asked ? " -- SQUASHED" : " -- honoured");
+
+        console.log(
+            `WIDTH at size=${this.sizeLabel}\n  viewport: ${window.innerWidth}px\n  asked for: ` +
+                `${Math.round(asked)}px (60rem)\n\nANCESTOR WIDTHS, innermost first:\n  ` +
+                chain.join("\n  ")
+        );
     }
 
     /**
