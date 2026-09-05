@@ -1,3 +1,0 @@
-/* Deliberately empty.
-   Every candidate is applied as an inline style from renderedCallback, so there is
-   one mechanism to reason about and no stylesheet to rule out. See the JS. */

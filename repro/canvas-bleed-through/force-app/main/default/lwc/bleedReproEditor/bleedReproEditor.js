@@ -1,43 +1,28 @@
 /**
  * Flow Builder custom property editor.
  *
- * A pure SLDS modal in a CPE does NOT reproduce the bleed, so the cause is in
- * something the real component does on top of that. Each candidate below can be
- * switched on before opening the modal, so a bisect costs a click instead of a
- * deploy.
+ * Opens the Studio modal. The modal is a native SLDS 2 `lightning/modal`, opened at
+ * size medium, with no custom CSS anywhere in this project.
  *
- * Ordered by suspicion. Turn them on one at a time, top down.
+ * The previous revision of this repro hand-rolled `slds-modal` markup inside this
+ * editor's own DOM, and reproduced the bleed with every custom style commented out.
+ * `lightning/modal` renders in the platform's overlay container instead, outside the
+ * property panel's subtree, so this build isolates whether the bleed comes from the
+ * modal living inside Flow Builder's transformed panel ancestors.
  */
 import { LightningElement, api } from "lwc";
-
-const CANDIDATES = [
-    {
-        label: "1. Elevate the modal's host (position: relative; z-index: 1000000)",
-        value: "hostElevation"
-    },
-    { label: "2. Container wider than the panel (92vw), so the modal overlaps the canvas", value: "wideContainer" },
-    { label: "3. z-index and an opaque background on the modal itself", value: "modalZIndex" },
-    { label: "4. Clip and scroll the modal content (max-height: 74vh; overflow: hidden)", value: "clippedContent" },
-    { label: "5. A tall scrolling subtree inside the modal", value: "tallSubtree" }
-];
+import BleedReproStudio from "c/bleedReproStudio";
 
 export default class BleedReproEditor extends LightningElement {
     @api inputVariables = [];
     @api builderContext = {};
 
-    candidateOptions = CANDIDATES;
-    selected = [];
-    isStudioOpen = false;
+    result;
 
-    handleCandidates(event) {
-        this.selected = event.detail.value;
-    }
-
-    handleOpen() {
-        this.isStudioOpen = true;
-    }
-
-    handleClose() {
-        this.isStudioOpen = false;
+    async handleOpen() {
+        this.result = await BleedReproStudio.open({
+            size: "medium",
+            description: "Studio Modal, a repro for canvas content painting over a modal"
+        });
     }
 }

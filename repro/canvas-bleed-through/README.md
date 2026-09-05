@@ -1,72 +1,90 @@
-# Repro: Flow Builder canvas paints over a custom modal in a property editor
+# Repro: Flow Builder canvas paints over a modal in a custom property editor
 
-Self-contained. Three small LWCs, no Apex, no dependencies, nothing from the product
-this was extracted from.
+Self-contained. Three small LWCs, no Apex, no dependencies, **no CSS at all**, and
+nothing from the product this was extracted from.
 
 ## Symptom
 
-A custom modal opened from a Flow screen component's custom property editor
-(`configurationEditor`) is painted **over** by the Flow Builder canvas — specifically
-the selected element's chip and its Move / Delete buttons. They appear on top of the
-modal, and remain clickable through it.
+A modal opened from a Flow screen component's custom property editor
+(`configurationEditor`) is painted **over** by the Flow Builder canvas — the selected
+element's chip and its Move / Delete buttons, and the flow's connector lines. They
+appear on top of the modal and remain visible through it.
 
 ## Reproduce
 
 1. Deploy: `sf project deploy start --source-dir force-app --target-org <org>`
 2. Create a screen flow, add a screen, drag on **Bleed Through Repro**.
-3. **Select the component on the canvas** so its chip and Move/Delete buttons are
+3. **Select the component on the canvas** so its chip and Move / Delete buttons are
    drawn. This step matters — with nothing selected there is nothing to bleed.
 4. In the property panel, click **Open Studio Modal**.
-5. The chip and buttons sit over the modal. Click **Force a repaint**, or focus and
-   blur the combobox, and the ordering becomes unmistakable.
 
-## Why the obvious answers are not the answer
+## What has been narrowed down so far
 
-The real component tried all of these and none fixed it:
+The bleed was first found in a modal built from hand-written `slds-modal` markup
+rendered inside the property editor's own DOM. That version reproduced the bleed
+**with every custom style removed** — the only thing left applied was elevating the
+editor's host element (`position: relative; z-index: 1000000`), which is itself one of
+the failed attempts below. So the product's ~190-line stylesheet is not the cause.
 
-| Attempt                                                                   | Result                                                           |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| An explicit high `z-index` on the modal                                   | No change                                                        |
-| Elevating the component **host** (`position: relative; z-index: 1000000`) | No change — and it is still applied here, in `connectedCallback` |
-| Making the modal's backdrop fully opaque                                  | No change; the canvas still paints above it                      |
+Failed attempts, in that hand-rolled version:
 
-Measured in Flow Builder with a shadow-piercing walk over both DOM branches: the
-modal resolved to `z-index: 1000000` and the canvas highlight (`.highlight.selected`)
-to `5`, **both inside the same stacking context** — the one created by Flow Builder's
+| Attempt                                                   | Result                                      |
+| --------------------------------------------------------- | ------------------------------------------- |
+| An explicit high `z-index` on the modal                   | No change                                   |
+| Elevating the component host (`z-index: 1000000`)         | No change                                   |
+| Making the modal's backdrop fully opaque                  | No change; the canvas still paints above it |
+| Removing all custom CSS                                   | No change — still bleeds                    |
+
+Measured in Flow Builder with a shadow-piercing walk over both DOM branches: the modal
+resolved to `z-index: 1000000` and the canvas highlight (`.highlight.selected`) to
+`5`, **both inside the same stacking context** — the one created by Flow Builder's
 transformed `.slds-modal__container` — with no intervening stacking context on either
-branch.
+branch. By that measurement the modal already wins the paint order outright, so the
+element painting above it may not be the highlight itself. Naming it is the question.
 
-By that measurement the modal already wins the paint order outright, so the element
-painting above it is probably **not** the canvas highlight. Naming it is the question.
+## What this version changes
 
-## What this repro deliberately does not include
+This build uses the platform's own modal: the SLDS 2 `lightning/modal` base component,
+opened with `size: "medium"`. That is the relevant difference, because `lightning/modal`
+renders in the platform's overlay container rather than in the property editor's
+subtree — so it is no longer a descendant of Flow Builder's transformed panel
+ancestors.
+
+The two questions for support:
+
+1. Does the bleed persist with the platform's own modal? If it does, no amount of CSS
+   in a custom modal is going to fix it, and the defect is in Flow Builder's canvas
+   layering.
+2. If it does **not**, is `lightning/modal` the supported way to open a dialog from a
+   `configurationEditor`? The docs do not say either way, and a custom property editor
+   is explicitly told elsewhere not to use flyouts or popouts.
+
+The hand-rolled version is preserved in this repo's git history (commit `5e12056d`),
+including a checkbox list of candidate causes that could be toggled without a redeploy.
+
+## Deliberate omissions
 
 So that nothing here is a red herring:
 
-- **No product CSS.** The real stylesheet is ~190 lines; `bleedReproStudio.css` keeps
-  only four rules, each of which could plausibly matter, listed in a comment there.
-  The most suspicious is the container width: the modal is `92vw`, wider than
-  `slds-modal_large`, which is what makes it overlap the canvas column instead of
-  sitting within the property panel.
-- **No `slds-backdrop` element**, matching the real component — the tint is a
-  `background-color` on the modal `<section>` instead.
-- **No state, no Apex, no data.** The datatable holds five hardcoded rows.
+- **No CSS.** There is no stylesheet in any of the three bundles.
+- **No product code**, no state, no Apex, no data. The datatable holds five hardcoded
+  rows purely to give the modal realistic height and a scroll region.
 
 ## The diagnostic button
 
-**Identify element at click** arms a one-shot capture listener. The next click is
-swallowed, and the element stack at those coordinates is written to the console:
-every element from the top down piercing shadow roots, then the ancestors of the
-topmost one with `position`, `z-index` and `transform`.
+**Identify Element at Click** arms a one-shot capture listener. The next click is
+swallowed, and the element stack at those coordinates is written to the console: every
+element from the top down piercing shadow roots, then the ancestors of the topmost one
+with `position`, `z-index` and `transform`.
 
-Click it, then click directly on a bleeding chip or button. The first entry names what
-is actually painting there. Delete `handleArmHitTest`, `hitTest` and its button if it
-is not wanted.
+Click it, then click directly on a bleeding chip, button or connector line. The first
+entry names what is actually painting there. Delete `handleArmHitTest`, `hitTest` and
+its button if it is not wanted.
 
 ## Files
 
 ```
 bleedRepro         Flow screen component. Exists only to host the editor.
-bleedReproEditor   The custom property editor. One button, opens the modal.
-bleedReproStudio   The modal. The whole problem is here.
+bleedReproEditor   The custom property editor. One button; opens the modal.
+bleedReproStudio   The modal. Extends LightningModal; no markup wrapper, no CSS.
 ```

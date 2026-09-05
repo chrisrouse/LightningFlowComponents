@@ -1,23 +1,15 @@
 <template>
     <div class="slds-p-around_small">
         <p class="slds-text-body_small slds-m-bottom_small">
-            Select this element on the canvas first, so the canvas draws its chip and its Move/Delete buttons. Then
-            choose candidates and open the modal.
+            Select this element on the canvas first, so the canvas draws its chip and its Move/Delete buttons. Then open
+            the modal and look for the chip or the connector lines painting over it.
         </p>
 
-        <lightning-checkbox-group
-            label="Candidate causes"
-            name="candidates"
-            options={candidateOptions}
-            value={selected}
-            onchange={handleCandidates}
-            class="slds-m-bottom_small"
-        ></lightning-checkbox-group>
-
-        <lightning-button variant="brand" label="Open Studio Modal" onclick={handleOpen}></lightning-button>
+        <lightning-button
+            variant="brand"
+            label="Open Studio Modal"
+            aria-haspopup="dialog"
+            onclick={handleOpen}
+        ></lightning-button>
     </div>
-
-    <template lwc:if={isStudioOpen}>
-        <c-bleed-repro-studio candidates={selected} onclose={handleClose}></c-bleed-repro-studio>
-    </template>
 </template>
