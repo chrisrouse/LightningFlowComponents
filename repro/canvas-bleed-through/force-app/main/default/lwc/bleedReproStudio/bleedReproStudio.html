@@ -1,0 +1,57 @@
+<template>
+    <!-- No slds-backdrop element, matching the real component: the tint comes from
+         the background-color on .studio instead. -->
+    <section
+        role="dialog"
+        tabindex="-1"
+        aria-modal="true"
+        aria-labelledby="studio-heading"
+        class="slds-modal slds-fade-in-open studio"
+    >
+        <div class="slds-modal__container studio__container">
+            <header class="slds-modal__header">
+                <h1 id="studio-heading" class="slds-modal__title slds-hyphenate">Studio Modal</h1>
+            </header>
+
+            <div class="slds-modal__content slds-p-around_medium studio__content">
+                <p class="slds-text-body_small slds-m-bottom_small">
+                    The canvas chip and its Move/Delete buttons for the selected element appear ON TOP of this modal.
+                    Clicking the buttons below forces repaints, which is when the order becomes obvious.
+                </p>
+
+                <div class="slds-m-bottom_medium">
+                    <lightning-button
+                        label="Force a repaint"
+                        class="slds-m-right_x-small"
+                        onclick={handleRepaint}
+                    ></lightning-button>
+                    <lightning-button label="Identify element at click" onclick={handleArmHitTest}></lightning-button>
+                    <span class="slds-m-left_small slds-text-body_small slds-text-color_weak">
+                        Repaints: {repaintCount}
+                    </span>
+                </div>
+
+                <!-- Focusing and blurring a combobox is the interaction that first exposed
+                     the paint order in the real component. -->
+                <lightning-combobox
+                    label="Focus and blur this"
+                    value={choice}
+                    options={options}
+                    onchange={handleChoice}
+                    class="slds-m-bottom_medium"
+                ></lightning-combobox>
+
+                <lightning-datatable
+                    key-field="id"
+                    columns={columns}
+                    data={rows}
+                    hide-checkbox-column
+                ></lightning-datatable>
+            </div>
+
+            <footer class="slds-modal__footer">
+                <lightning-button label="Close" onclick={handleClose}></lightning-button>
+            </footer>
+        </div>
+    </section>
+</template>

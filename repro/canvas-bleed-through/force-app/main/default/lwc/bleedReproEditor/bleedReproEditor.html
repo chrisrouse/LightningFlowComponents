@@ -1,0 +1,13 @@
+<template>
+    <div class="slds-p-around_small">
+        <p class="slds-text-body_small slds-m-bottom_small">
+            Select this element on the canvas first, so the canvas draws its chip and its Move/Delete buttons. Then open
+            the modal.
+        </p>
+        <lightning-button variant="brand" label="Open Studio Modal" onclick={handleOpen}></lightning-button>
+    </div>
+
+    <template lwc:if={isStudioOpen}>
+        <c-bleed-repro-studio onclose={handleClose}></c-bleed-repro-studio>
+    </template>
+</template>

@@ -1,0 +1,27 @@
+/* Only the rules that could plausibly cause the bleed. The real component's
+   stylesheet is ~190 lines of layout and colour; none of it is here, so anything
+   this repro shows is caused by the four things below rather than by our styling.
+
+   1. z-index on the modal itself
+   2. an opaque background on the modal, standing in for a backdrop — this component
+      deliberately does NOT render slds-backdrop, matching the real one
+   3. a container wider than slds-modal_large, so the modal overlaps the canvas
+      column rather than sitting inside the property panel's width
+   4. a fixed-height scrolling content area */
+.studio {
+    z-index: 99999;
+    background-color: #e5e5e5;
+}
+
+/* SLDS caps slds-modal_large at ~1024px. The real component widens past that so the
+   two panes fit, which is what puts it over the canvas. Suspected to matter. */
+.studio__container {
+    max-width: 92vw;
+    width: 92vw;
+    min-width: 60rem;
+}
+
+.studio__content {
+    max-height: 74vh;
+    overflow: hidden;
+}
