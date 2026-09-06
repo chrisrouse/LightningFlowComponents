@@ -34,7 +34,7 @@ scroll would reset the corrections and force a recompute — if the handler ran.
 The scroll container is ours and is guaranteed to overflow, so this does not depend on
 the property panel being tall enough to scroll.
 
-## RESOLVED — this is platform behaviour, not a kit defect
+## Confirmed defect — native tracks its field, the kit does not
 
 Measured in Flow Builder, Firefox, 2026-09-06, by walking shadow roots for open
 dropdowns and reading their computed position.
@@ -51,17 +51,18 @@ The kit's pickers live inside `lightning-accordion-section`, so `position: fixed
 the same choice Salesforce makes in the same place. The kit's premise — escape the
 clipped panel — is correct, not mistaken.
 
-**And native does not reposition it.** A standard Salesforce component's picklist was
-opened in the property panel and the panel scrolled until the field left the viewport
-entirely: the dropdown stayed exactly where it was drawn, floating over the page,
-detached from its field. That is precisely what the kit does.
+**But native repositions and the kit does not.** A standard Salesforce component's
+picklist was opened in the property panel and the panel scrolled: its dropdown stayed
+attached to the field throughout, and when the field scrolled out of view the dropdown
+followed it out of view rather than clamping. The kit's popover, by contrast, separates
+from its field on the first scroll and stays where it was drawn.
 
-So there is no bug here to report. Tracking the anchor would make the kit _better than_
-the platform — a legitimate enhancement, but one a maintainer may decline in order to
-stay consistent with native behaviour.
+An earlier revision of this file concluded the opposite — that detaching was platform
+behaviour and there was no defect. That was wrong: it read the scrolled-out-of-view
+screenshot as detachment, when the dropdown was still correctly anchored to a field
+that had simply left the viewport.
 
-Two differences from native are still worth raising upstream, being small and
-uncontroversial:
+Two further differences from native, small and worth raising alongside:
 
 - **z-index.** The kit uses `1000000`; native uses 7000/9101. A million sits above every
   Flow Builder layer, which is why the popover paints over canvas chrome that native
@@ -69,21 +70,30 @@ uncontroversial:
 - **Height.** Native caps to seven items (`slds-dropdown_length-with-icon-7`); the kit
   asks for 440px.
 
-### What was tried
+## Suggested fix, and what was tried
 
 Both prototypes were deployed to a preview org, verified, and reverted. Neither touched
 the vendored copy, which `VENDOR.md` forbids editing.
 
-- **Per-frame anchor tracking** in `createPopoverViewportController` — call the existing
-  handler once per animation frame while a picker is open, instead of trying to observe
-  scrollers that `scroll` events cannot escape. Six lines, no picker changes, no
-  ancestor traversal, so no Lightning Web Security question. **It worked**, and covers
-  anything that moves the anchor rather than scrolling alone. The residual stutter
-  matches how a native dropdown behaves mid-scroll.
+- **Per-frame anchor tracking — this is the recommended fix.** In
+  `createPopoverViewportController`, while a picker is open, call the existing handler
+  once per animation frame instead of relying on scroll listeners that cannot observe
+  the scrollers involved. Six lines, no picker changes, no ancestor traversal, so no
+  Lightning Web Security question. It worked, it matches native behaviour, and it also
+  covers anything else that moves the anchor — transforms, animations, layout shifts.
+  It is cheap because `positionAnchoredPopover` returns the same style string when
+  nothing moved, so an idle popover costs one `getBoundingClientRect` per frame and
+  writes no DOM.
 - **Inline rendering** (`position: absolute; top: 100%`, dropping the computed style) —
   rejected. `.picker` already has `position: relative`, so it is nearly pure CSS, but a
   440px browsing UI is clipped to about two rows inside a 12rem container, and native
   does not render inline in this context either.
+
+The same tracking is implemented consumer-side in Flow Grid, in
+`fgrid_flowGridEditor` and `fgrid_flowGridStudio`, as a workaround until the kit
+carries it: a probe rect per frame, re-dispatching a `scroll` on `window` when it
+moves. That is strictly worse than fixing it in the kit — every consumer would need
+it — which is the argument for the upstream change.
 
 ## Where it shows up in practice
 
