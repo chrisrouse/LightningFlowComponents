@@ -1,14 +1,28 @@
 <template>
     <div class="slds-p-around_small">
-        <p class="slds-text-body_small slds-m-bottom_x-small">
-            <strong>Steps.</strong> Open the <em>Resource</em> picker below so its dropdown appears, then scroll this
-            bordered box with the dropdown still open. The popover stays where it was drawn while its input scrolls
-            away.
-        </p>
+        <div class="version">
+            <strong>{version}</strong>
+        </div>
+
         <p class="slds-text-body_small slds-m-bottom_small slds-text-color_weak">
-            The box is a plain <code>overflow-y: auto</code> container in this component's own shadow root — the same
-            shape as any consumer that puts a picker in a scrolling panel.
+            <strong>With the patched kit, set Anchor tracking to Off</strong> — the kit should now follow the field on
+            its own. Open the <em>Resource</em> picker and scroll the box: unpatched, its popover detaches. Then open
+            the <em>native combobox</em> below it and scroll: that dropdown stays glued to its field, because it is
+            rendered inline rather than escaping the panel — and gets clipped by the box instead. That trade is the
+            whole question.
         </p>
+
+        <lightning-radio-group
+            name="trackingMode"
+            label="Anchor tracking"
+            options={trackingModes}
+            value={trackingMode}
+            onchange={handleModeChange}
+            class="slds-m-bottom_x-small"
+        ></lightning-radio-group>
+        <template lwc:if={isTracking}>
+            <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">{moveCountLabel}</p>
+        </template>
 
         <div class="scroller">
             <c-flow-config-resource-picker
@@ -20,6 +34,17 @@
                 automatic-output-variables={automaticOutputVariables}
                 onresourcechange={handleResource}
             ></c-flow-config-resource-picker>
+
+            <!-- The control this comparison exists for. lightning-combobox renders its
+                 dropdown INLINE, absolutely positioned inside its own container, so it
+                 tracks the field for free. Open it and scroll: it stays glued, and gets
+                 clipped by this box instead. That is the trade the kit made in reverse. -->
+            <lightning-combobox
+                label="Native combobox, for comparison"
+                options={nativeOptions}
+                value="alpha"
+                class="slds-m-top_small"
+            ></lightning-combobox>
 
             <template for:each={filler} for:item="row">
                 <p key={row.key} class="slds-p-vertical_x-small slds-text-body_small">{row.label}</p>

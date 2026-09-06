@@ -1,3 +1,16 @@
+/* Deploy marker. Loud on purpose: Flow Builder serves a stale module graph until a
+   hard refresh, and mistaking that for a failed fix has already cost two rounds. */
+.version {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #032d60;
+    color: #ffffff;
+    font-size: 0.75rem;
+    letter-spacing: 0.0625rem;
+}
+
 /* The only CSS in the project. A scroll container, guaranteed to overflow, so the
    repro does not depend on the property panel being tall enough to scroll. */
 .scroller {

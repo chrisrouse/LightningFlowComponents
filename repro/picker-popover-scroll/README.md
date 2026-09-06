@@ -13,7 +13,7 @@ exactly where it was drawn while its input scrolls away underneath it.
 
 The pickers do not render their dropdown inline. They render it `position: fixed` at
 coordinates they compute themselves — Flow Builder's property panel is a narrow
-*clipped* column that would cut off a normal dropdown — and they reposition from a
+_clipped_ column that would cut off a normal dropdown — and they reposition from a
 capture-phase `scroll` listener bound to `window`
 (`createPopoverViewportController` in `flowConfigPopoverUtils`).
 
@@ -33,6 +33,57 @@ scroll would reset the corrections and force a recompute — if the handler ran.
 
 The scroll container is ours and is guaranteed to overflow, so this does not depend on
 the property panel being tall enough to scroll.
+
+## RESOLVED — this is platform behaviour, not a kit defect
+
+Measured in Flow Builder, Firefox, 2026-09-06, by walking shadow roots for open
+dropdowns and reading their computed position.
+
+`lightning-base-combobox` picks its strategy from context:
+
+| Where                                                        | Position                  | z-index   |
+| ------------------------------------------------------------ | ------------------------- | --------- |
+| Builder toolbar, screen canvas, Component Visibility         | `absolute`, `top: 100%`   | 7000      |
+| Inside a `lightning-accordion-section` in the property panel | **`fixed`** + computed px | 9101–9102 |
+| Inside a consumer's `overflow-y: auto` box                   | **`fixed`** + computed px | 9101      |
+
+The kit's pickers live inside `lightning-accordion-section`, so `position: fixed` is
+the same choice Salesforce makes in the same place. The kit's premise — escape the
+clipped panel — is correct, not mistaken.
+
+**And native does not reposition it.** A standard Salesforce component's picklist was
+opened in the property panel and the panel scrolled until the field left the viewport
+entirely: the dropdown stayed exactly where it was drawn, floating over the page,
+detached from its field. That is precisely what the kit does.
+
+So there is no bug here to report. Tracking the anchor would make the kit _better than_
+the platform — a legitimate enhancement, but one a maintainer may decline in order to
+stay consistent with native behaviour.
+
+Two differences from native are still worth raising upstream, being small and
+uncontroversial:
+
+- **z-index.** The kit uses `1000000`; native uses 7000/9101. A million sits above every
+  Flow Builder layer, which is why the popover paints over canvas chrome that native
+  dropdowns sit politely within.
+- **Height.** Native caps to seven items (`slds-dropdown_length-with-icon-7`); the kit
+  asks for 440px.
+
+### What was tried
+
+Both prototypes were deployed to a preview org, verified, and reverted. Neither touched
+the vendored copy, which `VENDOR.md` forbids editing.
+
+- **Per-frame anchor tracking** in `createPopoverViewportController` — call the existing
+  handler once per animation frame while a picker is open, instead of trying to observe
+  scrollers that `scroll` events cannot escape. Six lines, no picker changes, no
+  ancestor traversal, so no Lightning Web Security question. **It worked**, and covers
+  anything that moves the anchor rather than scrolling alone. The residual stutter
+  matches how a native dropdown behaves mid-scroll.
+- **Inline rendering** (`position: absolute; top: 100%`, dropping the computed style) —
+  rejected. `.picker` already has `position: relative`, so it is nearly pure CSS, but a
+  440px browsing UI is clipped to about two rows inside a 12rem container, and native
+  does not render inline in this context either.
 
 ## Where it shows up in practice
 
