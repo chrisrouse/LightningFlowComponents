@@ -1,0 +1,7 @@
+{
+    "packageDirectories": [{ "path": "force-app", "default": true }],
+    "name": "datatable-row-number-clip-repro",
+    "namespace": "",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "67.0"
+}

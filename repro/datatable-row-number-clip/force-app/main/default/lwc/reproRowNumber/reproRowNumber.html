@@ -1,0 +1,51 @@
+<template>
+    <div class="slds-m-around_medium">
+        <p class="slds-text-heading_small">Row offset: {rowOffset}</p>
+        <p class="slds-text-body_small">
+            Neither table below sets <code>show-row-number-column</code>. Any row
+            numbers that appear are unrequested.
+        </p>
+    </div>
+
+    <div class="slds-m-around_medium">
+        <p class="slds-text-title_bold">A. Plain lightning-datatable, no row-number attribute</p>
+        <div style="height: 240px;">
+            <lightning-datatable
+                key-field="id"
+                data={data}
+                hide-checkbox-column
+                columns={columns}
+            >
+            </lightning-datatable>
+        </div>
+    </div>
+
+    <div class="slds-m-around_medium">
+        <p class="slds-text-title_bold">B. Our subclass, no row-number attribute</p>
+        <div style="height: 240px;">
+            <c-fgrid_custom-datatable
+                key-field="id"
+                data={data}
+                hide-checkbox-column
+                columns={columns}
+            >
+            </c-fgrid_custom-datatable>
+        </div>
+    </div>
+
+    <div class="slds-m-around_medium">
+        <p class="slds-text-title_bold">C. Plain, explicitly asking for row numbers (the clipping case)</p>
+        <div style="height: 240px;">
+            <lightning-datatable
+                key-field="id"
+                data={data}
+                show-row-number-column
+                row-number-offset={rowOffset}
+                hide-checkbox-column
+                columns={columns}
+            >
+            </lightning-datatable>
+        </div>
+        <lightning-button label="Increase row offset" onclick={increaseRowOffset}></lightning-button>
+    </div>
+</template>

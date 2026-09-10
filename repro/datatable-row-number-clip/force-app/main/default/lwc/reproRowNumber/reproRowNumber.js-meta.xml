@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Repro: Datatable Row Number Clipping</masterLabel>
+    <targets>
+        <!-- Every surface the comparison needs, so the SAME bundle can be dropped
+             in each without changing a line. That comparison is the whole point:
+             the clipping is reported on the LWR site and not in Flow Builder's
+             debug runner, which is how Flow Grid itself is used. -->
+        <target>lightningCommunity__Default</target>
+        <target>lightning__FlowScreen</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+</LightningComponentBundle>
