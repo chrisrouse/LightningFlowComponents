@@ -120,13 +120,33 @@ That leaves CSS, and CSS is closed too:
 
 ## Workaround
 
-**There isn't one.** A row number column of real text was built and did render
-correctly at every digit count — but it cannot replace this one, because an
-editable table gets the platform's column forced on regardless (see the section
-above), leaving two number columns instead of a fixed one. It was reverted.
+**Nothing a component can do, but the site owner can.** Correcting the claim above
+that "no stylesheet can select it": a *global* stylesheet does. Only queries are
+scoped under synthetic shadow, not style matching — which is why SLDS's own rules
+reach this span in the first place. Confirmed working in an LWR site, pasted into
+the site's `<style>` in the head markup:
 
-Removing editability from every column does hide the column, and is the only thing
-that works. That is not a workaround so much as giving up a feature.
+```css
+/*Fix row numbers in custom data table. Include Custom CSS class to target a specific table.*/
+.slds-row-number {
+    padding-left: 2px !important;
+}
+```
+
+52px of cell with 2px of padding fits three digits. `!important` is required
+because the 20px is an inline style.
+
+This is a site-level fix, not a component-level one, and that is the whole
+limitation: the rule hits every datatable on the site, standard components
+included. A component stylesheet was tried and confirmed not to reach it (the span
+is in `lightning-primitive-cell-factory`'s shadow root, a grandchild of the
+datatable), and shipping it from a static resource was declined for the same
+blast-radius reason.
+
+A row number column of real text was also built and did render correctly at every
+digit count — but it cannot replace this one, because an editable table gets the
+platform's column forced on regardless (see the section above), leaving two number
+columns instead of a fixed one. It was reverted.
 
 ## Deploy
 
