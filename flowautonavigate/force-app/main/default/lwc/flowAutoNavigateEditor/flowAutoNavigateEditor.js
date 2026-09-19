@@ -174,6 +174,19 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         return Boolean(this.resolve("refreshOnTimeout"));
     }
 
+    get refreshRecordId() {
+        return this.resolve("refreshRecordId");
+    }
+
+    get refreshRecordIdDataType() {
+        return this.inputDataType("refreshRecordId", null);
+    }
+
+    /** Nothing to target if the refresh itself is off. */
+    get refreshOptionsDisabled() {
+        return !this.refreshOnTimeout;
+    }
+
     get timeoutAction() {
         return this.resolve("timeoutAction");
     }

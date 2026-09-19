@@ -1,5 +1,6 @@
 import { createElement } from "lwc";
 import FlowAutoNavigate from "c/flowAutoNavigate";
+import { notifyRecordUpdateAvailable } from "lightning/uiRecordApi";
 
 const NEXT = "lightning__flownavigationnext";
 const BACK = "lightning__flownavigationback";
@@ -47,6 +48,9 @@ function elapse(milliseconds) {
 }
 
 beforeEach(() => {
+    // The uiRecordApi stub exports a module-level jest.fn(), which survives
+    // between tests; restoreAllMocks() does not touch it.
+    notifyRecordUpdateAvailable.mockClear();
     now = 1_700_000_000_000;
     jest.useFakeTimers();
     jest.spyOn(Date, "now").mockImplementation(() => now);
@@ -1006,5 +1010,63 @@ describe("page refresh", () => {
 
         expect(types(events)).toContain(REFRESH);
         expect(types(events)).not.toContain(NEXT);
+    });
+});
+
+describe("record refresh in Experience Cloud", () => {
+    const RECORD_ID = "001000000000001AAA";
+
+    /**
+     * An LWR site page with a standard Record Detail kept showing the stale
+     * value: RefreshEvent fires, but nothing on that page registered a refresh
+     * handler, so nothing listens. Notifying LDS reaches the record's wire
+     * directly, independent of the refresh tree.
+     */
+    it("notifies LDS for the configured record", () => {
+        const element = build({ seconds: 5, refreshOnTimeout: true, refreshRecordId: RECORD_ID });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+
+        expect(notifyRecordUpdateAvailable).toHaveBeenCalledWith([{ recordId: RECORD_ID }]);
+        // Both mechanisms fire; they cover different containers.
+        expect(types(events)).toContain(REFRESH);
+    });
+
+    it("still fires the view refresh when no record is given", () => {
+        const element = build({ seconds: 5, refreshOnTimeout: true });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+
+        expect(notifyRecordUpdateAvailable).not.toHaveBeenCalled();
+        expect(types(events)).toContain(REFRESH);
+    });
+
+    it("does not notify LDS when refreshing is off", () => {
+        build({ seconds: 5, refreshRecordId: RECORD_ID });
+
+        elapse(5_000);
+
+        expect(notifyRecordUpdateAvailable).not.toHaveBeenCalled();
+    });
+
+    it("notifies once, however long the deadline stays passed", () => {
+        build({ seconds: 5, refreshOnTimeout: true, refreshRecordId: RECORD_ID });
+
+        elapse(60_000);
+
+        expect(notifyRecordUpdateAvailable).toHaveBeenCalledTimes(1);
+    });
+
+    /** A failed re-fetch must not block the screen from advancing. */
+    it("navigates even if the LDS notification rejects", () => {
+        notifyRecordUpdateAvailable.mockRejectedValueOnce(new Error("no access"));
+        const element = build({ seconds: 5, refreshOnTimeout: true, refreshRecordId: RECORD_ID });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+
+        expect(types(events)).toContain(NEXT);
     });
 });

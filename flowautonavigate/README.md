@@ -163,6 +163,25 @@ So this refreshes a well-behaved modern page well, and an older Aura-heavy one
 only partially. That is a property of what is on the page, not of this
 component.
 
+#### Experience Cloud needs Record to Refresh
+
+`RefreshEvent` alone is **not** enough on an LWR site. Tested with a standard
+Account page and a standard Record Detail, the component kept showing the
+previous value: the event fires, but nothing on that page registered a refresh
+handler, so nothing acts on it.
+
+Set **Record to Refresh** to the flow's `recordId` and the component also calls
+`notifyRecordUpdateAvailable()`, which does not use the refresh tree at all.
+Per its reference it "considers the record data wired by all instantiated
+components" and re-emits to every wire using that id, which reaches an
+LDS-backed Record Detail directly.
+
+Harmless in Lightning Experience — set it anywhere you want the record itself
+guaranteed fresh, not just the view.
+
+Verified: **console tab** and **non-console record page** in Lightning
+Experience, with `Refresh the Page` alone.
+
 ## Behavior notes
 
 - **Timing is measured against a wall clock**, not by counting interval

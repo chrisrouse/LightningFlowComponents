@@ -22,6 +22,7 @@ import {
     FlowNavigationPauseEvent
 } from "lightning/flowSupport";
 import { RefreshEvent } from "lightning/refresh";
+import { notifyRecordUpdateAvailable } from "lightning/uiRecordApi";
 
 /**
  * How often the deadline is checked.
@@ -192,6 +193,23 @@ export default class FlowAutoNavigate extends LightningElement {
      * embedded flow mid-run.
      */
     @api refreshOnTimeout = false;
+
+    /**
+     * Optional record to re-fetch alongside the refresh, usually the flow's
+     * own `recordId`.
+     *
+     * `RefreshEvent` only reaches components that registered a refresh
+     * handler. That covers Lightning Experience, where the standard record
+     * page components participate, but an LWR Experience Cloud page with a
+     * standard Record Detail on it kept showing the stale value -- the event
+     * fires and nothing is listening.
+     *
+     * `notifyRecordUpdateAvailable` does not depend on the refresh tree at
+     * all. Per its reference, it "considers the record data wired by all
+     * instantiated components" and re-emits to every wire using that record
+     * id, so it reaches an LDS-backed Record Detail directly.
+     */
+    @api refreshRecordId;
     @api timerLabel;
     @api timerDirection = DIRECTION.DOWN;
 
@@ -479,7 +497,7 @@ export default class FlowAutoNavigate extends LightningElement {
         // Before any navigation, so the surrounding container receives it
         // while this component is still mounted.
         if (this.refreshOnTimeout) {
-            this.dispatchEvent(new RefreshEvent());
+            this.triggerPageRefresh();
         }
 
         if (this.timeoutAction === TIMEOUT_ACTION.STAY) {
@@ -527,6 +545,30 @@ export default class FlowAutoNavigate extends LightningElement {
             return new FlowNavigationFinishEvent();
         }
         return new FlowNavigationPauseEvent();
+    }
+
+    /**
+     * Two mechanisms, because one does not cover every container.
+     *
+     * `RefreshEvent` refreshes the view wherever something registered a
+     * refresh handler; `notifyRecordUpdateAvailable` refreshes any LDS wire on
+     * a given record whether or not anything registered. Firing both is not
+     * redundant work in any meaningful sense -- LDS re-emits only where the
+     * data actually changed.
+     */
+    triggerPageRefresh() {
+        this.dispatchEvent(new RefreshEvent());
+
+        if (!this.refreshRecordId) {
+            return;
+        }
+        // Not awaited: the screen may navigate immediately, and LDS completes
+        // the re-fetch independently of this component. Caught so a failed
+        // refresh cannot surface as an unhandled rejection -- there is no
+        // useful recovery from here, and it must not block navigation.
+        notifyRecordUpdateAvailable([{ recordId: this.refreshRecordId }]).catch(() => {
+            // intentionally ignored
+        });
     }
 
     /* ------------------------------------------------------------------ *
