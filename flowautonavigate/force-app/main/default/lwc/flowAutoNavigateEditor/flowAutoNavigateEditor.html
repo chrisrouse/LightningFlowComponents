@@ -91,7 +91,7 @@
                 builder-context={builderContext}
                 automatic-output-variables={automaticOutputVariables}
                 api-version={apiVersion}
-                onresourcechange={handleResourceChange}
+                onresourcechange={handlePausedChange}
             ></c-flow-config-resource-picker>
         </div>
 
@@ -171,25 +171,6 @@
                 checked={hideOnExpiry}
                 onchange={handleCheckbox}
             ></lightning-input>
-
-            <!-- Resource-only, like Pause Timer: a hardcoded true would hide
-                 the component permanently, which a Flow visibility condition
-                 already does better. -->
-            <c-flow-config-resource-picker
-                data-validatable
-                data-property="hideWhen"
-                label="Hide When This Is True"
-                property-name="hideWhen"
-                value={hideWhen}
-                accepted-types="Boolean"
-                collection="exclude"
-                allow-literal="false"
-                field-level-help="Optional. Bind a Flow Boolean or another component's output; the timer hides whenever it is true and reappears when it is false. The space is kept either way. Hiding is visual only -- the timer keeps running and still advances."
-                builder-context={builderContext}
-                automatic-output-variables={automaticOutputVariables}
-                api-version={apiVersion}
-                onresourcechange={handleResourceChange}
-            ></c-flow-config-resource-picker>
         </div>
 
         <!-- Time running out. The threshold gates the rest of the group: with
