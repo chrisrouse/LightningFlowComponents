@@ -170,14 +170,16 @@ Account page and a standard Record Detail, the component kept showing the
 previous value: the event fires, but nothing on that page registered a refresh
 handler, so nothing acts on it.
 
-Set **Record to Refresh** to the flow's `recordId` and the component also calls
+Add an input variable named `recordId` to the flow, bind **Record to Refresh**
+to it, and the component also calls
 `notifyRecordUpdateAvailable()`, which does not use the refresh tree at all.
 Per its reference it "considers the record data wired by all instantiated
 components" and re-emits to every wire using that id, which reaches an
 LDS-backed Record Detail directly.
 
-Harmless in Lightning Experience — set it anywhere you want the record itself
-guaranteed fresh, not just the view.
+Leave it blank for Lightning pages, where `RefreshEvent` already does the job.
+Setting it there is harmless, and does guarantee the record itself is fresh
+rather than just the view, but it is not needed.
 
 Verified: **console tab** and **non-console record page** in Lightning
 Experience, with `Refresh the Page` alone.
