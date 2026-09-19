@@ -28,6 +28,7 @@
             <property name="showProgressBar" type="Boolean" label="Show Progress Bar" role="inputOnly" />
             <property name="showLoader" type="Boolean" label="Show Loader" role="inputOnly" />
             <property name="hideOnExpiry" type="Boolean" label="Hide When Time Runs Out" role="inputOnly" />
+            <property name="refreshOnTimeout" type="Boolean" label="Refresh the Page" role="inputOnly" />
 
             <!-- Time running out. Summed the same way as the duration above,
                  so a warning can be minutes rather than seconds long. -->

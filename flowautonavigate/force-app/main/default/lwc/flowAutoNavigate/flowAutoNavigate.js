@@ -21,6 +21,7 @@ import {
     FlowNavigationFinishEvent,
     FlowNavigationPauseEvent
 } from "lightning/flowSupport";
+import { RefreshEvent } from "lightning/refresh";
 
 /**
  * How often the deadline is checked.
@@ -174,6 +175,23 @@ export default class FlowAutoNavigate extends LightningElement {
      * the screen stays exactly where it was.
      */
     @api hideOnExpiry = false;
+
+    /**
+     * Refresh the surrounding page when the timer expires.
+     *
+     * Uses RefreshView API (`lightning/refresh`), which the LWC guide names as
+     * the replacement for Aura's `force:refreshView`, and which the module
+     * reference lists as supported in Lightning Experience, Experience Builder
+     * Sites, the Salesforce mobile app, Lightning Out and standalone apps.
+     * One dispatch therefore covers console tabs, ordinary record pages and
+     * Experience Cloud, rather than the console-only `refreshTab()` path.
+     *
+     * It refreshes registered components in place. It is NOT a page reload, so
+     * a flow running on the refreshed page keeps its state -- unlike
+     * `refreshTab()` or `location.reload()`, either of which would restart an
+     * embedded flow mid-run.
+     */
+    @api refreshOnTimeout = false;
     @api timerLabel;
     @api timerDirection = DIRECTION.DOWN;
 
@@ -457,6 +475,12 @@ export default class FlowAutoNavigate extends LightningElement {
 
         this._timerExpired = true;
         this.dispatchEvent(new FlowAttributeChangeEvent("timerExpired", true));
+
+        // Before any navigation, so the surrounding container receives it
+        // while this component is still mounted.
+        if (this.refreshOnTimeout) {
+            this.dispatchEvent(new RefreshEvent());
+        }
 
         if (this.timeoutAction === TIMEOUT_ACTION.STAY) {
             // Nothing else to do: the screen stands, `timerExpired` is true,

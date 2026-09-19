@@ -53,6 +53,7 @@ starts as it changes, keeping the time already served rather than restarting.
 | Show Progress Bar       | Boolean | Depletes counting down, fills counting up.                    |
 | Show Loader             | Boolean | A spinner. Suggests loading; prefer the progress bar.         |
 | Hide When Time Runs Out | Boolean | Hides the component on expiry but keeps its space. See below. |
+| Refresh the Page        | Boolean | Refreshes the surrounding page on expiry. See below.          |
 
 ### Time running out
 
@@ -118,6 +119,49 @@ and value right and it behaves like any other component visibility rule.
 
 Either way, hiding is visual only. The timer keeps running and still advances
 the screen; use `Pause Timer` if you want the clock held as well.
+
+### Refreshing the page
+
+**Refresh the Page** dispatches a `RefreshEvent` from `lightning/refresh`
+(RefreshView API) when the timer expires, before any navigation.
+
+That module is [documented](https://developer.salesforce.com/docs/platform/lightning-component-reference/guide/lightning-refresh.html)
+as the replacement for Aura's `force:refreshView`, and as supported in
+Lightning Experience, Experience Builder Sites, the Salesforce mobile app,
+Lightning Out and standalone apps. One dispatch therefore covers console tabs,
+ordinary record pages and Experience Cloud.
+
+This is deliberately **not** the `lightning/platformWorkspaceApi` `refreshTab()`
+approach used by `ers_AutoNavigate_Refresh`. That one is console-only — it
+returns early when `IsConsoleNavigation` is false, so it does nothing on a
+standard record page or in a site — and it reloads the whole tab, which
+restarts any flow running on the refreshed page. `RefreshEvent` refreshes
+registered components in place, so a flow survives it.
+
+Pair it with **On Timeout = Stay on This Screen** and a Reset to poll: refresh
+on an interval while the user stays put.
+
+No container setup is needed. The guide is explicit: "If you're adding a
+component to an active page, you don't need to create a container to receive
+`RefreshEvent`. Add a container only if you want to determine the scope of your
+refresh." `RefreshEvent` bubbles to the nearest registered ancestor, which on a
+standard page is the platform's own container.
+
+What actually refreshes is narrower than "the page", and worth knowing before
+you rely on it:
+
+- **Only components that registered a refresh handler participate.** A custom
+  LWC that never called `registerRefreshHandler()` will not refresh, and
+  "components aren't responsible for refreshing their descendants".
+- **Aura base components don't support RefreshView API** at all, per the
+  guide's own limitations.
+- Lightning Data Service participates, but a component still has to initiate
+  its own refresh — `refreshApex()`, `refreshGraphQL()` or
+  `notifyRecordUpdateAvailable()`.
+
+So this refreshes a well-behaved modern page well, and an older Aura-heavy one
+only partially. That is a property of what is on the page, not of this
+component.
 
 ## Behavior notes
 

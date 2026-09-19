@@ -32,6 +32,7 @@ const DISPLAY_DEFAULTS = {
     showLoader: false,
     showProgressBar: false,
     hideOnExpiry: false,
+    refreshOnTimeout: false,
     warningShowIcon: false,
     warningTintProgressBar: false,
     warningStyle: "Color and Weight",
@@ -167,6 +168,10 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
 
     get hideOnExpiry() {
         return Boolean(this.resolve("hideOnExpiry"));
+    }
+
+    get refreshOnTimeout() {
+        return Boolean(this.resolve("refreshOnTimeout"));
     }
 
     get timeoutAction() {

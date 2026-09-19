@@ -75,6 +75,16 @@
                 onchange={handleSelect}
             ></lightning-combobox>
 
+            <lightning-input
+                type="checkbox"
+                data-validatable
+                data-property="refreshOnTimeout"
+                label="Refresh the Page"
+                field-level-help="Refreshes the surrounding page when the time runs out, using the standard Refresh API. Works in console tabs, ordinary record pages and Experience Cloud. It refreshes components in place rather than reloading, so a flow on the refreshed page keeps its state."
+                checked={refreshOnTimeout}
+                onchange={handleCheckbox}
+            ></lightning-input>
+
             <!-- Resource-only. A literal true would pause the timer forever, so
                  there is nothing useful to type here; the point is to bind a
                  Boolean that changes on this screen. -->

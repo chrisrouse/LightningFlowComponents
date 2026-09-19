@@ -6,6 +6,7 @@ const BACK = "lightning__flownavigationback";
 const FINISH = "lightning__flownavigationfinish";
 const PAUSE = "lightning__flownavigationpause";
 const ATTRIBUTE_CHANGE = "lightning__flowattributechange";
+const REFRESH = "lightning__refresh";
 
 const TICK_MS = 250;
 
@@ -29,7 +30,7 @@ function build({ hours, minutes, seconds, availableActions = ["NEXT"], ...rest }
 
 function captureEvents(element) {
     const events = [];
-    [NEXT, BACK, FINISH, PAUSE, ATTRIBUTE_CHANGE].forEach((type) => {
+    [NEXT, BACK, FINISH, PAUSE, ATTRIBUTE_CHANGE, REFRESH].forEach((type) => {
         element.addEventListener(type, (event) => events.push({ type, detail: event.detail }));
     });
     return events;
@@ -929,5 +930,81 @@ describe("hide when time runs out", () => {
         await Promise.resolve();
 
         expect(content(element).classList).not.toContain("auto-navigate__content_hidden");
+    });
+});
+
+describe("page refresh", () => {
+    it("does not refresh unless asked", () => {
+        const element = build({ seconds: 5 });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+
+        expect(types(events)).not.toContain(REFRESH);
+    });
+
+    it("does not refresh before the timer expires", () => {
+        const element = build({ seconds: 10, refreshOnTimeout: true });
+        const events = captureEvents(element);
+
+        elapse(9_000);
+
+        expect(types(events)).not.toContain(REFRESH);
+    });
+
+    /**
+     * RefreshView API rather than the console-only `refreshTab()`: one
+     * dispatch covers console tabs, ordinary record pages and Experience
+     * Cloud, and it refreshes in place instead of reloading, so a flow on the
+     * refreshed page survives.
+     */
+    it("dispatches a RefreshEvent on expiry", () => {
+        const element = build({ seconds: 5, refreshOnTimeout: true });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+
+        expect(types(events)).toContain(REFRESH);
+    });
+
+    it("refreshes before navigating, while still mounted", () => {
+        const element = build({ seconds: 5, refreshOnTimeout: true });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+
+        expect(types(events).indexOf(REFRESH)).toBeLessThan(types(events).indexOf(NEXT));
+    });
+
+    it("bubbles and crosses the shadow boundary so a container can catch it", () => {
+        build({ seconds: 5, refreshOnTimeout: true });
+        const caught = [];
+        document.body.addEventListener(REFRESH, (event) => caught.push(event));
+
+        elapse(5_000);
+
+        expect(caught).toHaveLength(1);
+        expect(caught[0].bubbles).toBe(true);
+        expect(caught[0].composed).toBe(true);
+    });
+
+    it("refreshes once, however long the deadline stays passed", () => {
+        const element = build({ seconds: 5, refreshOnTimeout: true });
+        const events = captureEvents(element);
+
+        elapse(60_000);
+
+        expect(types(events).filter((t) => t === REFRESH)).toHaveLength(1);
+    });
+
+    /** Staying put plus refresh is the polling case: refresh, screen remains. */
+    it("refreshes while staying on the screen", () => {
+        const element = build({ seconds: 5, refreshOnTimeout: true, timeoutAction: "Stay" });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+
+        expect(types(events)).toContain(REFRESH);
+        expect(types(events)).not.toContain(NEXT);
     });
 });

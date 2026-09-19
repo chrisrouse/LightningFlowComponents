@@ -370,3 +370,19 @@ describe("warning threshold entry", () => {
         expect(element.validate()).toEqual([]);
     });
 });
+
+describe("page refresh option", () => {
+    it("is off unless chosen", () => {
+        expect(control(build(), "refreshOnTimeout").checked).toBe(false);
+    });
+
+    it("publishes as a Boolean", async () => {
+        const element = build();
+        const details = captureInputs(element);
+
+        toggle(element, "refreshOnTimeout", true);
+        await Promise.resolve();
+
+        expect(details).toEqual([{ name: "refreshOnTimeout", newValue: true, newValueDataType: "Boolean" }]);
+    });
+});
