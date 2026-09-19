@@ -208,7 +208,59 @@ white text. It is too unreliable to offer.
 `fgridProbeCustom` is unstyled on all four surfaces. The shadow-root boundary is
 not surface-specific.
 
-## Conclusion — the palette to offer
+## ROUND 2 — 2026-09-19. The hover diagnosis was right, and it changes the plan
+
+### 1. It is hover, and a hover rule fixes it
+
+`slds-theme_success` and `slds-theme_error` carried a hover rule from the global
+stylesheet; the other themed rows deliberately did not. Under the cursor the
+fixed rows hold and the unfixed ones break — `slds-theme_inverse` keeps its
+white text while the row hover repaints grey underneath it, exactly as
+predicted. The earlier "branding set makes it illegible" reading was wrong: the
+palette was never the problem, the hover state was.
+
+### 2. A GLOBAL stylesheet reaches inside — on a record page AND in LWR
+
+`fgridProbeCustom` (component CSS) is unstyled. `fgridProbeGlobal` (static
+resource via `loadStyle`) renders purple. **On both surfaces.**
+
+This is the finding that unblocks everything. Round 1 concluded "our stylesheet
+cannot reach inside", which was true of component CSS and false of a global one.
+The component Flow Grid replaces has always done it this way.
+
+**So Option B is not needed.** We can define our own classes, with our own
+hover behaviour and our own colours, and they work everywhere.
+
+### 3. SLDS 2 hooks work, and give us blue and a guaranteed pairing
+
+All five hook rows render legibly on both surfaces, including under the cursor.
+The `-container-` / `-on-` pairing holds, which is the contrast guarantee
+`slds-theme_*` never gave us.
+
+The values differ by surface — pastel under SLDS 2 light, saturated in LWR —
+which is correct behaviour and the reason Grid Studio's preview must render live
+rather than draw a fixed swatch.
+
+**One token is wrong.** `--slds-g-color-disabled-container-1` with
+`--slds-g-color-on-disabled-1` renders as washed-out grey text on washed-out
+grey in LWR, close to illegible. That is the tokens working as designed — they
+are for disabled UI, which is *supposed* to recede. Use a surface pair for a
+neutral instead.
+
+### 4. The icon custom property did not reach
+
+`--slds-c-icon-color-foreground` set on our host did not turn the datatable's
+icons purple. Either it does not inherit across that boundary or the datatable's
+icon does not consume that hook. Moot — the icon follows the cell's text colour,
+and the global stylesheet can set that.
+
+## Conclusion — SUPERSEDED BY ROUND 2
+
+The palette below was derived from `slds-theme_*` before round 2 showed we do
+not have to use those classes at all. Kept for the record; see
+**The design, after round 2** at the end.
+
+## Round 1's palette (superseded)
 
 Measured across Flow debug, SLDS 1, SLDS 2 light, SLDS 2 dark and LWR:
 
@@ -232,3 +284,45 @@ Colour follows the running theme and, in a site, the branding set. Flow Grid
 picks the meaning; the platform picks the pixels. That is why the control says
 "Success" and not "Green", and why Grid Studio's preview must render live —
 a fixed swatch in the editor would be lying on four surfaces out of five.
+
+## The design, after round 2
+
+**Do not use `slds-theme_*`.** It is an SLDS 1 construct, it renders five
+different ways across the surfaces we tested, it bundles a text colour we cannot
+separate, and it breaks on hover.
+
+Instead: Flow Grid ships its own classes in a static resource, loaded with
+`loadStyle`, coloured from SLDS 2 global styling hooks with SLDS 1 fallbacks,
+each with a matching hover rule.
+
+```css
+/* Scoped under our own tag, so nothing else on the page is touched. */
+c-fgrid_flow-grid .fgridFormat_error,
+c-fgrid_flow-grid .slds-table tbody tr:hover > td .fgridFormat_error {
+    background-color: var(--slds-g-color-error-container-1, #fddde3);
+    color: var(--slds-g-color-on-error-1, #b60554);
+}
+```
+
+What that buys, all of it measured rather than assumed:
+
+| | |
+| --- | --- |
+| Contrast | guaranteed by the `-container-` / `-on-` pairing |
+| Dark mode | each hook carries its own light and dark value |
+| Hover | ours to control, which is the bug that started this |
+| Palette | Error, Warning, Success, Accent (blue), Neutral — blue was unreachable through `slds-theme_*` |
+| Surfaces | verified on a record page and in an LWR site |
+
+Still to settle: the neutral. `disabled-container` is too washed out in LWR.
+Try `--slds-g-color-surface-container-2` paired with
+`--slds-g-color-on-surface-1`.
+
+### This reverses an earlier decision, deliberately
+
+Flow Grid STATUS records `loadStyle` as rejected, on the grounds that "a
+distributed package should not restyle a customer's whole site". That objection
+was raised about a toast `z-index` fix that needed a rule with `!important`
+against platform chrome. This is different in kind: every selector is scoped
+under `c-fgrid_flow-grid`, so nothing outside the component can be affected.
+The objection stands for the toast case and does not apply here.
