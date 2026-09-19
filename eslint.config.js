@@ -6,7 +6,7 @@ module.exports = [
     eslintJs.configs.recommended,
     ...(Array.isArray(salesforceLwcConfig) ? salesforceLwcConfig : [salesforceLwcConfig]),
     {
-        files: ["flowgrid/**/lwc/**/*.js"],
+        files: ["flowgrid/**/lwc/**/*.js", "recordlistlwr/**/lwc/**/*.js", "flowautonavigate/**/lwc/**/*.js"],
         languageOptions: { ecmaVersion: 2023, sourceType: "module" }
     },
     {
@@ -30,7 +30,10 @@ module.exports = [
             }
         },
         rules: {
-            "@lwc/lwc/no-async-operation": "off"
+            "@lwc/lwc/no-async-operation": "off",
+            // Driving a wire adapter outside @wire is exactly what a test wire
+            // adapter is for -- `adapter.emit(data)` is the documented API.
+            "@lwc/lwc/no-unexpected-wire-adapter-usages": "off"
         }
     }
 ];

@@ -4,13 +4,13 @@
     "version": "0.1.0",
     "description": "Flow Grid - a Flow screen datatable built on the Flow Config Editor Kit",
     "scripts": {
-        "lint": "eslint flowgrid/**/lwc/**/*.js",
+        "lint": "eslint flowgrid/**/lwc/**/*.js recordlistlwr/**/lwc/**/*.js flowautonavigate/**/lwc/**/*.js",
         "test": "npm run test:unit",
         "test:unit": "sfdx-lwc-jest",
         "test:unit:watch": "sfdx-lwc-jest --watch",
         "test:unit:coverage": "sfdx-lwc-jest --coverage",
-        "prettier": "prettier --write \"flowgrid/**/*.{js,html,css,json,cls}\"",
-        "prettier:verify": "prettier --check \"flowgrid/**/*.{js,html,css,json,cls}\"",
+        "prettier": "prettier --write \"{flowgrid,recordlistlwr,flowautonavigate}/**/*.{js,html,css,json,cls}\"",
+        "prettier:verify": "prettier --check \"{flowgrid,recordlistlwr,flowautonavigate}/**/*.{js,html,css,json,cls}\"",
         "verify": "npm run prettier:verify && npm run lint && npm run test:unit"
     },
     "engines": {

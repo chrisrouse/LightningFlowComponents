@@ -31,6 +31,14 @@
         {
             "path": "flowgrid/force-app",
             "default": false
+        },
+        {
+            "path": "recordlistlwr/force-app",
+            "default": false
+        },
+        {
+            "path": "flowautonavigate/force-app",
+            "default": false
         }
     ],
     "namespace": "",
