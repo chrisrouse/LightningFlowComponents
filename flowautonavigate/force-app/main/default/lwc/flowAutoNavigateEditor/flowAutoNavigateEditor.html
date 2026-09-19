@@ -167,7 +167,7 @@
                 data-validatable
                 data-property="hideOnExpiry"
                 label="Hide When Time Runs Out"
-                field-level-help="Hides the timer once it expires while keeping its space, so nothing below it jumps. Use this rather than a visibility condition on Timer Expired -- a component cannot drive its own visibility from its own output."
+                field-level-help="Hides the timer once it expires but keeps its space, so nothing below it moves up. To remove it and let the screen close the gap, leave this off and put a Flow visibility condition on the Timer Expired output instead."
                 checked={hideOnExpiry}
                 onchange={handleCheckbox}
             ></lightning-input>

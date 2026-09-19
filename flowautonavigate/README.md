@@ -44,15 +44,15 @@ starts as it changes, keeping the time already served rather than restarting.
 
 ### Display
 
-| Property                | Type    | Notes                                                        |
-| ----------------------- | ------- | ------------------------------------------------------------ |
-| Show Timer              | Boolean | Off by default; the component advances silently.             |
-| Timer Direction         | String  | `Down` (default) or `Up`. Needs Show Timer.                  |
-| Show Timer Reset        | Boolean | Offers a Reset button. Needs Show Timer. See Accessibility.  |
-| Message to Users        | String  | Rich text below the timer. Accepts a Flow resource.          |
-| Show Progress Bar       | Boolean | Depletes counting down, fills counting up.                   |
-| Show Loader             | Boolean | A spinner. Suggests loading; prefer the progress bar.        |
-| Hide When Time Runs Out | Boolean | Hides the component on expiry, keeping its space. See below. |
+| Property                | Type    | Notes                                                         |
+| ----------------------- | ------- | ------------------------------------------------------------- |
+| Show Timer              | Boolean | Off by default; the component advances silently.              |
+| Timer Direction         | String  | `Down` (default) or `Up`. Needs Show Timer.                   |
+| Show Timer Reset        | Boolean | Offers a Reset button. Needs Show Timer. See Accessibility.   |
+| Message to Users        | String  | Rich text below the timer. Accepts a Flow resource.           |
+| Show Progress Bar       | Boolean | Depletes counting down, fills counting up.                    |
+| Show Loader             | Boolean | A spinner. Suggests loading; prefer the progress bar.         |
+| Hide When Time Runs Out | Boolean | Hides the component on expiry but keeps its space. See below. |
 
 ### Time running out
 
@@ -102,20 +102,22 @@ Set **On Timeout** to **Stay on This Screen** and the two diverge:
 is the combination that lets a Message component (or anything else on the
 screen) render on expiry, with the user clicking Next themselves.
 
-### Do not drive this component's visibility from its own output
+### Two ways to hide the timer when it expires
 
-Putting a Flow visibility condition on this component that references its own
-`timerExpired` **does not work, and the component never appears at all**. Flow
-evaluates the condition before the component mounts, so the output is still
-unset, the condition fails, the component never renders, and it therefore never
-reports a value. It is circular.
+Both work. Pick on whether you want the space back.
 
-Use **Hide When Time Runs Out** instead. It applies `visibility: hidden` to the
-component's content on expiry, so the timer disappears but its space is kept
-and nothing below it jumps up.
+| Approach                                    | Result                                                                                                     |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Flow visibility condition on `timerExpired` | The component is removed. Whatever is below it moves up to close the gap.                                  |
+| **Hide When Time Runs Out**                 | The component is hidden with `visibility: hidden`. It keeps its footprint, so nothing on the screen moves. |
 
-Driving a _different_ component from `timerExpired` is fine and is the intended
-use — that is the Stay pattern above.
+The visibility condition is an ordinary Flow rule on this component's own
+output — the component reports `timerExpired` as `false` when the screen loads
+and `true` on expiry, so a condition on it resolves normally. Get the operator
+and value right and it behaves like any other component visibility rule.
+
+Either way, hiding is visual only. The timer keeps running and still advances
+the screen; use `Pause Timer` if you want the clock held as well.
 
 ## Behavior notes
 
