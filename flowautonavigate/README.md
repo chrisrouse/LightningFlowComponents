@@ -230,6 +230,32 @@ Experience, with `Refresh the Page` alone.
   moves under a screen reader user.
 - The `Pulse` warning style honors `prefers-reduced-motion`.
 
+## Verified in an org
+
+Unit tests cover the logic; this table is about what has actually been run in
+Salesforce, because several of these depend on platform behavior that tests
+cannot prove.
+
+| Behavior                                                  | Status                                                              |
+| --------------------------------------------------------- | ------------------------------------------------------------------- |
+| Refresh in a console tab                                  | Verified                                                            |
+| Refresh on a non-console record page                      | Verified                                                            |
+| Refresh in Experience Cloud (LWR), with Record to Refresh | Verified                                                            |
+| Refresh in Experience Cloud without Record to Refresh     | Confirmed **not** to work                                           |
+| Pause Timer, bound to a reactive Boolean                  | Verified                                                            |
+| On Timeout: Next                                          | Verified                                                            |
+| On Timeout: Back                                          | Verified                                                            |
+| On Timeout: Stay, driving a Message from Timer Expired    | Verified                                                            |
+| Countdown display and progress bar                        | Verified                                                            |
+| Warning style: Tinted Pill                                | Verified                                                            |
+| On Timeout: Finish                                        | Not tested                                                          |
+| On Timeout: Pause the Flow                                | Not tested — needs a pausable flow, and does nothing if unavailable |
+| Advance When This Is True                                 | Not tested                                                          |
+| Hide When Time Runs Out                                   | Not tested                                                          |
+| Warning style: Pulse, and `prefers-reduced-motion`        | Not tested                                                          |
+| Milestone screen reader announcements                     | Not tested — never heard by a screen reader                         |
+| Salesforce mobile app                                     | Not tested                                                          |
+
 ## Development
 
 ```bash
