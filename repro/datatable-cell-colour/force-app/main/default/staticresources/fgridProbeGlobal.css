@@ -1,0 +1,71 @@
+/*********************************************************************
+ * Global stylesheet, loaded with loadStyle.
+ *
+ * The component this probe informs replaces ships one of these, whose
+ * own header reads "style sheet to bypass shadow dom". Component CSS
+ * is scoped and never reaches inside lightning-datatable; a global
+ * document stylesheet does -- under SYNTHETIC shadow. Under native
+ * shadow it should not. That difference is the whole question.
+ *********************************************************************/
+
+/* TEST 1 -- can a global rule colour a cell at all?
+   Scoped under our own tag so it cannot restyle anything else on the
+   page, which is the objection that got loadStyle rejected before. */
+c-repro-cell-colour .fgridProbeGlobal {
+    background-color: #9050e9;
+    color: #ffffff;
+}
+
+/* TEST 2 -- the hover fix.
+   The theme class sets a background AND a text colour. The datatable's
+   row hover repaints the background and leaves the text colour alone,
+   which is how slds-theme_error ends up white-on-near-white under the
+   cursor. Re-assert the background on hover for the themed cells. */
+c-repro-cell-colour .slds-table:not(.slds-no-row-hover) tbody tr:hover > td .fgridProbeHoverFix.slds-theme_error {
+    background-color: #ba0517;
+    color: #ffffff;
+}
+c-repro-cell-colour .slds-table:not(.slds-no-row-hover) tbody tr:hover > td .fgridProbeHoverFix.slds-theme_success {
+    background-color: #2e844a;
+    color: #ffffff;
+}
+
+/* TEST 5 -- SLDS 2 global styling hooks, the real candidate.
+   slds-theme_* is an SLDS 1 construct, which is why one class rendered five
+   different ways across SLDS 1, SLDS 2 light, SLDS 2 dark and LWR. The SLDS 2
+   hooks instead come in guaranteed pairs: a -container- background and the
+   -on- foreground documented as the text colour for it, each with its own
+   light and dark value.
+
+   Fallbacks are the SLDS 1 equivalents, so an org still on SLDS 1 -- where
+   these hooks are not defined -- degrades to something sane rather than
+   transparent.
+
+   If these rows render legibly on every surface AND stay legible under the
+   cursor, this is the palette, and slds-theme_* can be dropped entirely. */
+c-repro-cell-colour .fgridHook_error,
+c-repro-cell-colour .slds-table tbody tr:hover > td .fgridHook_error {
+    background-color: var(--slds-g-color-error-container-1, #fddde3);
+    color: var(--slds-g-color-on-error-1, #b60554);
+}
+c-repro-cell-colour .fgridHook_success,
+c-repro-cell-colour .slds-table tbody tr:hover > td .fgridHook_success {
+    background-color: var(--slds-g-color-success-container-1, #acf3e4);
+    color: var(--slds-g-color-on-success-1, #056764);
+}
+c-repro-cell-colour .fgridHook_warning,
+c-repro-cell-colour .slds-table tbody tr:hover > td .fgridHook_warning {
+    background-color: var(--slds-g-color-warning-container-1, #f9e3b6);
+    color: var(--slds-g-color-on-warning-1, #8c4b02);
+}
+/* The two the slds-theme_* set could not give us at all. */
+c-repro-cell-colour .fgridHook_accent,
+c-repro-cell-colour .slds-table tbody tr:hover > td .fgridHook_accent {
+    background-color: var(--slds-g-color-accent-container-1, #066afe);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+c-repro-cell-colour .fgridHook_neutral,
+c-repro-cell-colour .slds-table tbody tr:hover > td .fgridHook_neutral {
+    background-color: var(--slds-g-color-disabled-container-1, #e5e5e5);
+    color: var(--slds-g-color-on-disabled-1, #757575);
+}

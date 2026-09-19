@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Public</cacheControl>
+    <contentType>text/css</contentType>
+    <description>Probe only. Tests whether a global stylesheet reaches inside lightning-datatable on each surface, and whether a hover rule can fix the themed-cell text colour.</description>
+</StaticResource>

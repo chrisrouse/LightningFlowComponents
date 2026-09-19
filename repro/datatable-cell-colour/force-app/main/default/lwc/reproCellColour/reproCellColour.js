@@ -1,86 +1,109 @@
 import { LightningElement } from "lwc";
+import { loadStyle } from "lightning/platformResourceLoader";
+import FGRID_PROBE_GLOBAL from "@salesforce/resourceUrl/fgridProbeGlobal";
 
 /**
  * What a `cellAttributes.class` can actually do to a datatable cell.
  *
- * Flow Grid is about to offer declarative conditional formatting, and Option A
- * delivers the colour as a global `slds-*` class through `cellAttributes.class`.
- * That class lands INSIDE `lightning-datatable`'s shadow root, so only classes
- * the platform already ships can reach it — our own stylesheet cannot.
+ * Flow Grid is adding declarative conditional formatting, and Option A delivers
+ * colour as a global `slds-*` class through `cellAttributes.class`. Run 1 of
+ * this probe measured five surfaces and produced a workable palette. Then a
+ * hovered screenshot showed `slds-theme_error` rendering white text on a
+ * near-white background -- the value simply gone.
  *
- * Which leaves four things unmeasured, and the rule editor's design depends on
- * every one of them:
+ * ROUND 2 tests the explanation and the fix.
  *
- *   1. WHICH classes actually colour a cell. Salesforce's own conditional
- *      formatting offers six swatches, set as inline hex (#747474 grey,
- *      #0176D3 blue, #2E844A green, #DD7A01 orange, #BA0517 red, #9050E9
- *      purple). No SLDS class produces those, so our palette is whatever this
- *      table renders — not whatever the swatch row shows.
- *   2. Whether an ICON in the cell takes colour from that class. `cellAttributes`
- *      has no `iconColor` (confirmed against the component reference), so a
- *      class is the only candidate. If it does not work, "Icon colour" is a line
- *      in the docs rather than a control in the editor.
- *   3. Whether TEXT and BACKGROUND are separable. `slds-theme_*` sets both at
- *      once; `slds-text-color_*` claims to set only the text. If they are not
- *      separable, two controls in the editor collapse into one.
- *   4. Whether a colour set INLINE in a custom cell type's own template survives.
- *      That is the load-bearing assumption under Option B, the upgrade path, and
- *      it is free to check here.
+ * The explanation: the theme class sets a background AND a text colour. The
+ * datatable's own row hover repaints the background and leaves the text colour
+ * alone, so a themed cell under the cursor keeps white text and loses the dark
+ * background that made it legible. If that is right, the bug is hover only, the
+ * palette is fine, and the fix is a hover rule.
  *
- * Read the rendered table, not this comment. The point of the repro is that the
- * answer is whatever the browser draws.
+ * The catch is that a hover rule cannot be written in component CSS, which is
+ * scoped and never reaches inside `lightning-datatable`. Round 1 proved that:
+ * `fgridProbeCustom` rendered unstyled on all five surfaces.
+ *
+ * But that tested the wrong kind of stylesheet. The component Flow Grid
+ * replaces ships a STATIC RESOURCE loaded with `loadStyle`, whose own header
+ * reads "style sheet to bypass shadow dom", and uses it to fix hover behaviour
+ * on exactly these cells. A global document stylesheet penetrates SYNTHETIC
+ * shadow; under native shadow it should not. Lightning Experience and an LWR
+ * site may therefore disagree -- which is the question.
+ *
+ * Four things this run answers, none of them answerable on paper:
+ *
+ *   1. Is the illegibility hover-only? Hover each themed row and watch.
+ *   2. Does a global stylesheet reach inside the datatable, per surface?
+ *      (`fgridProbeGlobal` column -- purple if yes, unstyled if no.)
+ *   3. Can a hover rule repair the themed cell? (`slds-theme_error` and
+ *      `slds-theme_success` rows carry `fgridProbeHoverFix`; the other themed
+ *      rows deliberately do not, so the two can be compared under the cursor.)
+ *   4. Does a CSS CUSTOM PROPERTY cross the shadow boundary where a selector
+ *      cannot? Custom properties inherit, and the original uses
+ *      `--slds-c-icon-color-foreground` for exactly this. Set on our host
+ *      below -- if the icons go purple, we can colour an icon on any surface
+ *      without a static resource at all.
+ *
+ * Every styled cell now repeats its own class name as its value, so a cropped
+ * screenshot identifies itself. Round 1's labels sat in a neighbouring
+ * unstyled column and a crop lost them.
  */
 
 /** Every class worth trying, with what it is a candidate for. */
 const CANDIDATES = [
-    { key: "theme-success", label: "slds-theme_success", group: "Theme", cssClass: "slds-theme_success" },
-    { key: "theme-warning", label: "slds-theme_warning", group: "Theme", cssClass: "slds-theme_warning" },
-    { key: "theme-error", label: "slds-theme_error", group: "Theme", cssClass: "slds-theme_error" },
-    { key: "theme-info", label: "slds-theme_info", group: "Theme", cssClass: "slds-theme_info" },
-    { key: "theme-inverse", label: "slds-theme_inverse", group: "Theme", cssClass: "slds-theme_inverse" },
-    { key: "theme-alt-inverse", label: "slds-theme_alt-inverse", group: "Theme", cssClass: "slds-theme_alt-inverse" },
-    { key: "theme-shade", label: "slds-theme_shade", group: "Theme", cssClass: "slds-theme_shade" },
-    { key: "theme-default", label: "slds-theme_default", group: "Theme", cssClass: "slds-theme_default" },
+    { label: "slds-theme_success", group: "Theme", cssClass: "slds-theme_success fgridProbeHoverFix" },
+    { label: "slds-theme_warning", group: "Theme", cssClass: "slds-theme_warning" },
+    { label: "slds-theme_error", group: "Theme", cssClass: "slds-theme_error fgridProbeHoverFix" },
+    { label: "slds-theme_info", group: "Theme", cssClass: "slds-theme_info" },
+    { label: "slds-theme_inverse", group: "Theme", cssClass: "slds-theme_inverse" },
+    { label: "slds-theme_shade", group: "Theme", cssClass: "slds-theme_shade" },
 
-    { key: "text-success", label: "slds-text-color_success", group: "Text only", cssClass: "slds-text-color_success" },
-    { key: "text-error", label: "slds-text-color_error", group: "Text only", cssClass: "slds-text-color_error" },
-    { key: "text-weak", label: "slds-text-color_weak", group: "Text only", cssClass: "slds-text-color_weak" },
-    { key: "text-default", label: "slds-text-color_default", group: "Text only", cssClass: "slds-text-color_default" },
-    { key: "text-inverse", label: "slds-text-color_inverse", group: "Text only", cssClass: "slds-text-color_inverse" },
+    { label: "slds-text-color_success", group: "Text only", cssClass: "slds-text-color_success" },
+    { label: "slds-text-color_error", group: "Text only", cssClass: "slds-text-color_error" },
+    { label: "slds-text-color_weak", group: "Text only", cssClass: "slds-text-color_weak" },
 
-    // Backgrounds without a theme's text colour, if they resolve at all.
-    { key: "bg-success", label: "slds-badge_success", group: "Other", cssClass: "slds-badge_success" },
-    { key: "bg-alt", label: "slds-box_xx-small", group: "Other", cssClass: "slds-box_xx-small" },
+    // SLDS 2 global styling hooks -- the real candidate. Paired container and
+    // on- tokens, so Salesforce guarantees the contrast, each with its own
+    // light and dark value. These rows also carry their own hover rule.
+    { label: "HOOK error (container + on-)", group: "SLDS 2 hook", cssClass: "fgridHook_error" },
+    { label: "HOOK success (container + on-)", group: "SLDS 2 hook", cssClass: "fgridHook_success" },
+    { label: "HOOK warning (container + on-)", group: "SLDS 2 hook", cssClass: "fgridHook_warning" },
+    // Neither of these was reachable through slds-theme_* at all.
+    { label: "HOOK accent — blue", group: "SLDS 2 hook", cssClass: "fgridHook_accent" },
+    { label: "HOOK neutral — grey", group: "SLDS 2 hook", cssClass: "fgridHook_neutral" },
 
-    // Does a class WE define reach inside the datatable's shadow root? Expected
-    // to fail. If it renders, the whole palette question is moot and Option A
-    // can offer the six native colours directly.
-    { key: "ours", label: "fgridProbeCustom (ours)", group: "Ours", cssClass: "fgridProbeCustom" },
+    // Component-scoped CSS. Failed on all five surfaces in round 1; kept as the
+    // control that the boundary is still where it was.
+    { label: "fgridProbeCustom (component CSS)", group: "Ours", cssClass: "fgridProbeCustom" },
 
-    // The control. Whatever this looks like is "no formatting".
-    { key: "none", label: "(no class)", group: "Control", cssClass: "" }
+    // The same colour from the GLOBAL static resource. The difference between
+    // this row and the one above is the entire finding.
+    { label: "fgridProbeGlobal (static resource)", group: "Ours", cssClass: "fgridProbeGlobal" },
+
+    { label: "(no class)", group: "Control", cssClass: "" }
 ];
 
 export default class ReproCellColour extends LightningElement {
+    styleStatus = "Global stylesheet: not loaded yet";
+
     /**
-     * One column per question.
-     *
-     * `Styled` and `WithIcon` carry the SAME class so the icon question is
-     * answered beside the colour question rather than in a separate run.
+     * Two rows carry `fgridProbeHoverFix` and the rest do not, so hovering
+     * compares the fix against the bug in one gesture.
      */
     columns = [
-        { label: "Class applied", fieldName: "label", type: "text", wrapText: true, initialWidth: 220 },
-        { label: "Group", fieldName: "group", type: "text", initialWidth: 100 },
+        { label: "Group", fieldName: "group", type: "text", initialWidth: 110 },
         {
-            label: "Text + background",
-            fieldName: "sample",
+            label: "Class applied — HOVER THIS COLUMN",
+            fieldName: "label",
             type: "text",
+            wrapText: true,
             cellAttributes: { class: { fieldName: "cssClass" } }
         },
         {
             label: "Same class, with an icon",
-            fieldName: "sample",
+            fieldName: "label",
             type: "text",
+            wrapText: true,
             cellAttributes: {
                 class: { fieldName: "cssClass" },
                 iconName: "utility:trending",
@@ -88,9 +111,10 @@ export default class ReproCellColour extends LightningElement {
             }
         },
         {
-            label: "Currency, to check formatting survives",
+            label: "Currency",
             fieldName: "amount",
             type: "currency",
+            initialWidth: 130,
             cellAttributes: { class: { fieldName: "cssClass" } }
         }
     ];
@@ -100,7 +124,24 @@ export default class ReproCellColour extends LightningElement {
         label: candidate.label,
         group: candidate.group,
         cssClass: candidate.cssClass,
-        sample: "Sample text",
         amount: 25000 + index
     }));
+
+    renderedCallback() {
+        if (this._styleRequested) {
+            return;
+        }
+        this._styleRequested = true;
+
+        // Reported on screen rather than to the console: a screenshot has to be
+        // able to say whether the stylesheet loaded, or an unstyled row is
+        // ambiguous between "shadow boundary held" and "the file never arrived".
+        loadStyle(this, FGRID_PROBE_GLOBAL)
+            .then(() => {
+                this.styleStatus = "Global stylesheet: LOADED";
+            })
+            .catch((error) => {
+                this.styleStatus = `Global stylesheet: FAILED — ${error?.message || error}`;
+            });
+    }
 }
