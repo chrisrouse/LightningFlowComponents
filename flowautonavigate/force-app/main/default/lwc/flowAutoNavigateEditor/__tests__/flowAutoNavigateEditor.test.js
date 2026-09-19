@@ -250,6 +250,13 @@ describe("timeout action", () => {
         expect(values).toEqual(["Next", "Back", "Stay"]);
     });
 
+    /** Labels are Flow Builder's wording; the values are the saved contract. */
+    it("labels Back as Previous without changing its stored value", () => {
+        const options = control(build(), "timeoutAction").options;
+        expect(options.map((o) => o.label)).toEqual(["Next", "Previous", "Stay on This Screen"]);
+        expect(options.find((o) => o.label === "Previous").value).toBe("Back");
+    });
+
     it("publishes the chosen action", async () => {
         const element = build();
         const details = captureInputs(element);

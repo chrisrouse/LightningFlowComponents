@@ -193,8 +193,10 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
 
     get actionOptions() {
         return [
-            { label: "Go to Next Screen", value: "Next" },
-            { label: "Go Back", value: "Back" },
+            // Labels only. The stored values stay Next/Back/Stay so renaming
+            // a label never touches a saved flow.
+            { label: "Next", value: "Next" },
+            { label: "Previous", value: "Back" },
             { label: "Stay on This Screen", value: "Stay" }
         ];
     }
