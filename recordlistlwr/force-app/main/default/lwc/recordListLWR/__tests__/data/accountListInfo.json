@@ -1,0 +1,110 @@
+{
+  "cloneable": true,
+  "createable": true,
+  "deletable": true,
+  "displayColumns": [
+    {
+      "fieldApiName": "Name",
+      "inlineEditAttributes": {},
+      "label": "Account Name",
+      "lookupId": "Id",
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "fieldApiName": "Site",
+      "inlineEditAttributes": {},
+      "label": "Account Site",
+      "lookupId": null,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "fieldApiName": "BillingState",
+      "inlineEditAttributes": {},
+      "label": "Billing State/Province",
+      "lookupId": null,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "fieldApiName": "Phone",
+      "inlineEditAttributes": {},
+      "label": "Phone",
+      "lookupId": null,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "fieldApiName": "Type",
+      "inlineEditAttributes": {},
+      "label": "Type",
+      "lookupId": null,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "fieldApiName": "Owner.Alias",
+      "inlineEditAttributes": {},
+      "label": "Account Owner Alias",
+      "lookupId": "OwnerId",
+      "searchable": false,
+      "sortable": true
+    }
+  ],
+  "eTag": "3674af37c66e58d7fad3889f1b03c4f3",
+  "filterLogicString": null,
+  "filteredByInfo": [],
+  "hasMassActions": false,
+  "inlineEditDetails": {
+    "message": "Inline Edit is disabled. To edit, filter by one record type.",
+    "state": "Disabled"
+  },
+  "label": "All Accounts",
+  "listReference": {
+    "id": "00BWs0000009uZFMAY",
+    "listViewApiName": "AllAccounts",
+    "objectApiName": "Account",
+    "type": "listView"
+  },
+  "listShares": [],
+  "objectApiNames": [
+    "Account",
+    "User"
+  ],
+  "orderedByInfo": [
+    {
+      "fieldApiName": "Name",
+      "isAscending": true,
+      "label": "Account Name"
+    }
+  ],
+  "scope": {
+    "apiName": "everything",
+    "entity": null,
+    "label": "All accounts",
+    "relatedEntity": null
+  },
+  "searchable": true,
+  "updateable": true,
+  "userPreferences": {
+    "columnWidths": {
+      "Site": -1,
+      "Type": -1,
+      "Owner.Alias": -1,
+      "Phone": -1,
+      "BillingState": -1,
+      "Name": -1
+    },
+    "columnWrap": {
+      "Site": false,
+      "Type": false,
+      "Owner.Alias": false,
+      "Phone": false,
+      "BillingState": false,
+      "Name": false
+    }
+  },
+  "visibility": "Public",
+  "visibilityEditable": true
+}

@@ -1,0 +1,47 @@
+<template>
+    <!-- No width properties, no absolute positioning, no popovers: each misaligns
+         the Experience Builder property panel. -->
+    <template lwc:if={hasObject}>
+        <template lwc:if={hasOptions}>
+            <lightning-combobox
+                label={label}
+                field-level-help={description}
+                required={required}
+                value={value}
+                options={options}
+                placeholder="Select a list view"
+                dropdown-alignment="auto"
+                onchange={handleChange}
+            ></lightning-combobox>
+
+            <template lwc:if={isStaleValue}>
+                <p class="record-list-view-editor__note">{staleMessage}</p>
+            </template>
+        </template>
+
+        <template lwc:elseif={isLoading}>
+            <lightning-input type="text" label={label} placeholder="Loading..." disabled></lightning-input>
+        </template>
+
+        <template lwc:elseif={hasNoListViews}>
+            <lightning-input type="text" label={label} disabled></lightning-input>
+            <p class="record-list-view-editor__note">This object has no list views you can see.</p>
+        </template>
+
+        <template lwc:else>
+            <lightning-input type="text" label={label} disabled></lightning-input>
+            <p class="record-list-view-editor__note">{errorMessage}</p>
+        </template>
+    </template>
+
+    <template lwc:else>
+        <lightning-input type="text" label={label} disabled></lightning-input>
+        <p class="record-list-view-editor__note">Choose an object first to see its list views.</p>
+    </template>
+
+    <template lwc:if={errors}>
+        <template for:each={errors} for:item="error">
+            <p key={error.message} class="slds-text-color_error slds-text-body_small">{error.message}</p>
+        </template>
+    </template>
+</template>

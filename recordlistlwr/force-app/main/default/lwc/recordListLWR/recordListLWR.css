@@ -1,0 +1,55 @@
+/* Phase 1 keeps styling to the SLDS defaults. The property panel that exposes the
+   standard component's colour, padding and border options is phase 6 — these rules
+   are only what the layout needs to stand up. No width properties: the LWR property
+   panel breaks if a component sets its own width. */
+
+.record-list {
+    border: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+    border-radius: 0.25rem;
+    background-color: var(--slds-g-color-neutral-base-100, #fff);
+}
+
+.record-list__header {
+    border-bottom: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+}
+
+/* The coloured square behind the object icon, matching the standard component.
+   The colour is the theme's hex, applied inline from getObjectInfo. */
+.record-list__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.25rem;
+    flex: 0 0 auto;
+}
+
+.record-list__icon img {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.record-list__search {
+    max-width: 20rem;
+}
+
+/* A spinner needs a positioned ancestor with height or it collapses to nothing. */
+.record-list__loading {
+    min-height: 6rem;
+}
+
+/* Deliberately loud and cramped: this is a troubleshooting readout, and it should
+   be obvious that it is not part of the component's normal chrome. */
+.record-list__diagnostics {
+    font-family: monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    background-color: #fffbe6;
+    border-top: 1px solid #e5c100;
+    word-break: break-all;
+}
+
+.record-list__pagination {
+    border-top: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+}

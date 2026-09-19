@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Record List View Editor</masterLabel>
+    <description>Custom property editor listing the list views of the object selected on the Record List LWR component.</description>
+    <targets>
+        <target>lightning__PropertyEditor</target>
+    </targets>
+</LightningComponentBundle>

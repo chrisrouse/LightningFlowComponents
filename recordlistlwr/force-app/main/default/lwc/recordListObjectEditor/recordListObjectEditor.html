@@ -1,0 +1,69 @@
+<template>
+    <!-- No width properties, no absolute positioning, no popovers anywhere in here:
+         each one breaks or misaligns the Experience Builder property panel. The
+         results list expands in flow and the panel scrolls. -->
+    <template lwc:if={hasOptions}>
+        <div onkeydown={handleKeyDown}>
+            <lightning-input
+                type="search"
+                label={label}
+                field-level-help={description}
+                required={required}
+                value={inputValue}
+                placeholder="Search objects..."
+                autocomplete="off"
+                onfocus={handleFocus}
+                onchange={handleSearch}
+                onblur={handleBlur}
+            ></lightning-input>
+
+            <template lwc:if={isOpen}>
+                <ul class="record-list-object-editor__list" role="listbox">
+                    <template for:each={visibleOptions} for:item="option">
+                        <li
+                            key={option.value}
+                            class={option.cssClass}
+                            role="option"
+                            data-value={option.value}
+                            title={option.apiName}
+                            onmousedown={handleOptionMouseDown}
+                        >
+                            {option.label}
+                        </li>
+                    </template>
+                </ul>
+
+                <template lwc:if={hasNoMatches}>
+                    <p class="record-list-object-editor__note">No objects match that search.</p>
+                </template>
+
+                <template lwc:if={hasHiddenMatches}>
+                    <p class="record-list-object-editor__note">{hiddenMessage}</p>
+                </template>
+            </template>
+        </div>
+    </template>
+
+    <template lwc:elseif={isLoading}>
+        <lightning-input type="text" label={label} value={value} disabled></lightning-input>
+    </template>
+
+    <template lwc:else>
+        <lightning-input
+            type="text"
+            label={label}
+            field-level-help={description}
+            required={required}
+            value={value}
+            placeholder="Account"
+            oncommit={handleCommit}
+        ></lightning-input>
+        <p class="record-list-object-editor__note">{fallbackMessage}</p>
+    </template>
+
+    <template lwc:if={errors}>
+        <template for:each={errors} for:item="error">
+            <p key={error.message} class="slds-text-color_error slds-text-body_small">{error.message}</p>
+        </template>
+    </template>
+</template>

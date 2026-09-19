@@ -1,0 +1,126 @@
+<template>
+    <div class="record-list">
+        <!-- UNCONFIGURED: no object or list view chosen yet. Shown instead of the
+             whole component, because a header and pagination wrapped around a
+             permanent spinner reads as broken rather than as unfinished. This is
+             mostly what an admin sees on the Experience Builder canvas before
+             filling in the two settings. -->
+        <template lwc:if={isUnconfigured}>
+            <div class="slds-p-around_medium slds-text-color_weak">
+                Select an object and a list view in the component's settings to display records.
+            </div>
+        </template>
+
+        <template lwc:else>
+            <!-- HEADER: icon, title, list view picker, status line, search -->
+            <template lwc:if={showHeader}>
+                <div class="record-list__header slds-p-around_medium">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
+                        <div class="slds-col slds-grow slds-grid slds-grid_vertical-align-center">
+                            <template lwc:if={showObjectIconBadge}>
+                                <span class="record-list__icon slds-m-right_small" style={objectIconStyle}>
+                                    <img src={objectIconUrl} alt="" />
+                                </span>
+                            </template>
+
+                            <template lwc:if={showTitle}>
+                                <h2 class="slds-text-heading_small slds-truncate" title={title}>{title}</h2>
+                            </template>
+
+                            <template lwc:if={showListViewPicker}>
+                                <lightning-button-menu
+                                    alternative-text="Select a List View"
+                                    menu-alignment="left"
+                                    icon-size="x-small"
+                                    variant="bare"
+                                    onselect={handleListViewSelect}
+                                >
+                                    <template for:each={listViewMenuItems} for:item="item">
+                                        <lightning-menu-item
+                                            key={item.value}
+                                            value={item.value}
+                                            label={item.label}
+                                            checked={item.checked}
+                                        ></lightning-menu-item>
+                                    </template>
+                                </lightning-button-menu>
+                            </template>
+                        </div>
+
+                        <template lwc:if={showSearch}>
+                            <div class="slds-col record-list__search">
+                                <lightning-input
+                                    type="search"
+                                    label="Search This List"
+                                    variant="label-hidden"
+                                    placeholder="Search this list..."
+                                    oncommit={handleSearchCommit}
+                                ></lightning-input>
+                            </div>
+                        </template>
+                    </div>
+
+                    <template lwc:if={showStatus}>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">{statusLine}</p>
+                    </template>
+                </div>
+            </template>
+
+            <!-- BODY: the table, or whichever state stands in for it -->
+            <template lwc:if={error}>
+                <div class="slds-p-around_medium slds-text-color_error" role="alert">{errorMessage}</div>
+            </template>
+
+            <template lwc:elseif={isLoading}>
+                <div class="slds-p-around_medium slds-is-relative record-list__loading">
+                    <lightning-spinner alternative-text="Loading records" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <template lwc:elseif={isEmpty}>
+                <div class="slds-p-around_medium slds-text-color_weak">No items to display.</div>
+            </template>
+
+            <template lwc:else>
+                <lightning-datatable
+                    key-field="id"
+                    columns={columns}
+                    data={rows}
+                    sorted-by={sortedBy}
+                    sorted-direction={sortedDirection}
+                    onsort={handleSort}
+                    hide-checkbox-column
+                ></lightning-datatable>
+            </template>
+
+            <!-- DIAGNOSTICS: off unless an admin ticks Show Diagnostics. Reading the
+                 component's real state has repeatedly beaten inferring it. -->
+            <template lwc:if={showDiagnostics}>
+                <div class="record-list__diagnostics slds-p-around_x-small">
+                    <p>{debugMarker}</p>
+                    <p>{debugSummary}</p>
+                    <p>sort: {debugSort}</p>
+                    <p>urls: {debugUrls}</p>
+                    <p>refLinks: {debugReferenceLinks}</p>
+                    <p>optionalFields: {debugOptionalFields}</p>
+                    <p>col[0]: {debugFirstColumn}</p>
+                    <p>row[0]: {debugFirstRow}</p>
+                    <p>raw: {debugRawRecord}</p>
+                </div>
+            </template>
+
+            <!-- PAGINATION -->
+            <template lwc:if={showPagination}>
+                <div class="record-list__pagination slds-p-around_small slds-grid slds-grid_align-center">
+                    <lightning-button
+                        label="Previous"
+                        disabled={isFirstPage}
+                        onclick={handlePrevious}
+                        class="slds-m-right_x-small"
+                    ></lightning-button>
+                    <lightning-button label="Next" disabled={isLastPage} onclick={handleNext}></lightning-button>
+                </div>
+            </template>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,238 @@
+{
+  "count": 2,
+  "currentPageToken": "0",
+  "currentPageUrl": "/services/data/v62.0/ui-api/list-records/Account/AllAccounts?pageSize=2&pageToken=0",
+  "fields": [],
+  "listInfoETag": null,
+  "listReference": {
+    "id": "00BWs0000009uZFMAY",
+    "listViewApiName": "AllAccounts",
+    "objectApiName": "Account",
+    "type": "listView"
+  },
+  "nextPageToken": "2",
+  "nextPageUrl": "/services/data/v62.0/ui-api/list-records/Account/AllAccounts?pageSize=2&pageToken=2",
+  "optionalFields": [],
+  "pageSize": 2,
+  "previousPageToken": null,
+  "previousPageUrl": null,
+  "records": [
+    {
+      "apiName": "Account",
+      "childRelationships": {},
+      "eTag": "8a3b9bad7dbee264ed435c11309226c7",
+      "fields": {
+        "BillingState": {
+          "displayValue": null,
+          "value": "IL"
+        },
+        "CreatedDate": {
+          "displayValue": "4/20/2024, 2:44 PM",
+          "value": "2024-04-20T18:44:16.000Z"
+        },
+        "Id": {
+          "displayValue": null,
+          "value": "001Ws000002Nui9IAC"
+        },
+        "LastModifiedById": {
+          "displayValue": null,
+          "value": "005Ws0000004ydVIAQ"
+        },
+        "LastModifiedDate": {
+          "displayValue": "4/20/2024, 2:44 PM",
+          "value": "2024-04-20T18:44:16.000Z"
+        },
+        "Name": {
+          "displayValue": null,
+          "value": "Abbott, Kessler and Haley"
+        },
+        "Owner": {
+          "displayValue": "Chris Rouse",
+          "value": {
+            "apiName": "User",
+            "childRelationships": {},
+            "eTag": "2be705f13e52ab7b0009f6050379691f",
+            "fields": {
+              "Alias": {
+                "displayValue": null,
+                "value": "CRous"
+              },
+              "CreatedDate": {
+                "displayValue": "4/18/2024, 6:35 PM",
+                "value": "2024-04-18T22:35:51.000Z"
+              },
+              "Id": {
+                "displayValue": null,
+                "value": "005Ws0000004ydVIAQ"
+              },
+              "LastModifiedById": {
+                "displayValue": null,
+                "value": "005Ws0000004ydVIAQ"
+              },
+              "LastModifiedDate": {
+                "displayValue": "8/27/2026, 11:17 AM",
+                "value": "2026-08-27T15:17:51.000Z"
+              },
+              "Name": {
+                "displayValue": null,
+                "value": "Chris Rouse"
+              },
+              "SystemModstamp": {
+                "displayValue": "8/27/2026, 11:17 AM",
+                "value": "2026-08-27T15:17:51.000Z"
+              }
+            },
+            "id": "005Ws0000004ydVIAQ",
+            "lastModifiedById": "005Ws0000004ydVIAQ",
+            "lastModifiedDate": "2026-08-27T15:17:51.000Z",
+            "recordTypeId": null,
+            "recordTypeInfo": null,
+            "systemModstamp": "2026-08-27T15:17:51.000Z",
+            "weakEtag": 1787843871000
+          }
+        },
+        "OwnerId": {
+          "displayValue": null,
+          "value": "005Ws0000004ydVIAQ"
+        },
+        "Phone": {
+          "displayValue": null,
+          "value": null
+        },
+        "RecordTypeId": {
+          "displayValue": null,
+          "value": null
+        },
+        "Site": {
+          "displayValue": null,
+          "value": null
+        },
+        "SystemModstamp": {
+          "displayValue": "4/20/2024, 2:44 PM",
+          "value": "2024-04-20T18:44:16.000Z"
+        },
+        "Type": {
+          "displayValue": null,
+          "value": null
+        }
+      },
+      "id": "001Ws000002Nui9IAC",
+      "lastModifiedById": "005Ws0000004ydVIAQ",
+      "lastModifiedDate": "2024-04-20T18:44:16.000Z",
+      "recordTypeId": "012000000000000AAA",
+      "recordTypeInfo": null,
+      "systemModstamp": "2024-04-20T18:44:16.000Z",
+      "weakEtag": 1713638656000
+    },
+    {
+      "apiName": "Account",
+      "childRelationships": {},
+      "eTag": "57f1f1d5f5e68c55d798846edf5b26e0",
+      "fields": {
+        "BillingState": {
+          "displayValue": null,
+          "value": "OK"
+        },
+        "CreatedDate": {
+          "displayValue": "4/20/2024, 2:44 PM",
+          "value": "2024-04-20T18:44:16.000Z"
+        },
+        "Id": {
+          "displayValue": null,
+          "value": "001Ws000002NunXIAS"
+        },
+        "LastModifiedById": {
+          "displayValue": null,
+          "value": "005Ws0000004ydVIAQ"
+        },
+        "LastModifiedDate": {
+          "displayValue": "4/20/2024, 2:44 PM",
+          "value": "2024-04-20T18:44:16.000Z"
+        },
+        "Name": {
+          "displayValue": null,
+          "value": "Abernathy and Sons"
+        },
+        "Owner": {
+          "displayValue": "Chris Rouse",
+          "value": {
+            "apiName": "User",
+            "childRelationships": {},
+            "eTag": "2be705f13e52ab7b0009f6050379691f",
+            "fields": {
+              "Alias": {
+                "displayValue": null,
+                "value": "CRous"
+              },
+              "CreatedDate": {
+                "displayValue": "4/18/2024, 6:35 PM",
+                "value": "2024-04-18T22:35:51.000Z"
+              },
+              "Id": {
+                "displayValue": null,
+                "value": "005Ws0000004ydVIAQ"
+              },
+              "LastModifiedById": {
+                "displayValue": null,
+                "value": "005Ws0000004ydVIAQ"
+              },
+              "LastModifiedDate": {
+                "displayValue": "8/27/2026, 11:17 AM",
+                "value": "2026-08-27T15:17:51.000Z"
+              },
+              "Name": {
+                "displayValue": null,
+                "value": "Chris Rouse"
+              },
+              "SystemModstamp": {
+                "displayValue": "8/27/2026, 11:17 AM",
+                "value": "2026-08-27T15:17:51.000Z"
+              }
+            },
+            "id": "005Ws0000004ydVIAQ",
+            "lastModifiedById": "005Ws0000004ydVIAQ",
+            "lastModifiedDate": "2026-08-27T15:17:51.000Z",
+            "recordTypeId": null,
+            "recordTypeInfo": null,
+            "systemModstamp": "2026-08-27T15:17:51.000Z",
+            "weakEtag": 1787843871000
+          }
+        },
+        "OwnerId": {
+          "displayValue": null,
+          "value": "005Ws0000004ydVIAQ"
+        },
+        "Phone": {
+          "displayValue": null,
+          "value": null
+        },
+        "RecordTypeId": {
+          "displayValue": null,
+          "value": null
+        },
+        "Site": {
+          "displayValue": null,
+          "value": null
+        },
+        "SystemModstamp": {
+          "displayValue": "4/20/2024, 2:44 PM",
+          "value": "2024-04-20T18:44:16.000Z"
+        },
+        "Type": {
+          "displayValue": null,
+          "value": null
+        }
+      },
+      "id": "001Ws000002NunXIAS",
+      "lastModifiedById": "005Ws0000004ydVIAQ",
+      "lastModifiedDate": "2024-04-20T18:44:16.000Z",
+      "recordTypeId": "012000000000000AAA",
+      "recordTypeInfo": null,
+      "systemModstamp": "2024-04-20T18:44:16.000Z",
+      "weakEtag": 1713638656000
+    }
+  ],
+  "searchTerm": null,
+  "sortBy": "Name,Id",
+  "where": null
+}

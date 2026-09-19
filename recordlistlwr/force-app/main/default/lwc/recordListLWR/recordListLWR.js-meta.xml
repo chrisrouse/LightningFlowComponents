@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Record List LWR</masterLabel>
+    <description>Display, search, and sort records for any object in your LWR site, with selection, inline editing, and actions.</description>
+    <!-- BOTH targets are required, and they do different jobs:
+         - lightningCommunity__Page makes it a drag-and-drop component that appears
+           in the Components panel. Without this the component deploys fine and is
+           simply absent from the palette.
+         - lightningCommunity__Default exposes the editable properties below.
+           On its own it configures nothing you can place. -->
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <!-- Deliberately NOT required="true": a required value with no default
+                 rendered as a red, un-typeable input, and required="true" cannot be
+                 added to a property once the component is in use on a page. The
+                 component shows its own prompt when a value is missing. -->
+            <property
+                name="objectApiName"
+                type="String"
+                label="Object"
+                description="The object whose records this component lists."
+                editor="c/recordListObjectEditor"
+            />
+            <property
+                name="listView"
+                type="String"
+                label="List View"
+                description="Supplies the columns, filter, and sort order. Choose an object first."
+                editor="c/recordListViewEditor"
+            />
+            <property
+                name="pageSize"
+                type="Integer"
+                label="Number of Records to Display"
+                description="Records shown per page, from 1 to 2000."
+                default="10"
+                required="true"
+            />
+
+            <property name="showHeader" type="Boolean" label="Show Header" default="true" />
+            <property name="showObjectIcon" type="Boolean" label="Show Object Icon" default="true" />
+            <property name="showTitle" type="Boolean" label="Show Title" default="true" />
+            <property
+                name="showListViewPicker"
+                type="Boolean"
+                label="Show List View Picker"
+                description="Lets a visitor switch list views. The choice lasts for their visit and doesn't change this property."
+                default="true"
+            />
+            <property
+                name="showStatus"
+                type="Boolean"
+                label="Show Status"
+                description="The item count and sort field shown under the title."
+                default="true"
+            />
+            <property name="showSearch" type="Boolean" label="Show Search" default="true" />
+            <property name="showPagination" type="Boolean" label="Show Pagination" default="true" />
+            <property
+                name="disableUserLinks"
+                type="Boolean"
+                label="Disable User Links"
+                description="Shows user fields such as Owner as plain text instead of linking to their profile page. Use this when visitors can't see user profiles."
+            />
+            <property
+                name="showDiagnostics"
+                type="Boolean"
+                label="Show Diagnostics"
+                description="Troubleshooting only. Displays the component's live data state below the table. Leave off for site visitors."
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

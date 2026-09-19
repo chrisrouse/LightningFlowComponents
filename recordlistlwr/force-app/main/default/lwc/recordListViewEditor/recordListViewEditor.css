@@ -1,0 +1,9 @@
+/* No width properties and no absolute positioning: the property panel owns its
+   width, and a component that sets either one misaligns the whole panel. */
+.record-list-view-editor__note {
+    margin-top: 0.25rem;
+    font-size: 11px;
+    line-height: 1.3;
+    color: #514f4d;
+    word-break: break-word;
+}
