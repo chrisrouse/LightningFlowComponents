@@ -18,6 +18,10 @@ module.exports = {
         "^lightning/modal$": "<rootDir>/flowgrid/test/jest-mocks/lightning/modal",
         // The shipped uiListsApi stub exports only 2 of the module's 10 adapters,
         // omitting getListRecordsByName and getListInfosByObjectName.
-        "^lightning/uiListsApi$": "<rootDir>/recordlistlwr/test/jest-mocks/lightning/uiListsApi"
+        "^lightning/uiListsApi$": "<rootDir>/recordlistlwr/test/jest-mocks/lightning/uiListsApi",
+        // The shipped flowSupport stub's FlowAttributeChangeEvent takes no
+        // constructor arguments, so a Flow output's attributeName and value are
+        // unassertable. See the file.
+        "^lightning/flowSupport$": "<rootDir>/flowautonavigate/test/jest-mocks/lightning/flowSupport"
     }
 };
