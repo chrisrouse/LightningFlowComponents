@@ -403,7 +403,7 @@ export default class FlowAutoNavigate extends LightningElement {
     /**
      * Where the bar should be pointed, one tick ahead of now.
      *
-     * A CSS transition animates *towards* the value it is given, so a target of
+     * A CSS transition animates *toward* the value it is given, so a target of
      * "where we are" leaves the bar permanently one period behind -- which is
      * why it still had a second of travel left when the clock read 0:00. Aiming
      * one period ahead means the animation arrives exactly as that moment
@@ -565,7 +565,7 @@ export default class FlowAutoNavigate extends LightningElement {
      * Whether anything occupying space renders.
      *
      * Gates the bottom margin, so a component set to advance silently does not
-     * push its neighbour down by half a rem for nothing.
+     * push its neighbor down by half a rem for nothing.
      */
     get hasVisibleContent() {
         return Boolean(this.showTimer || this.showProgressBar || this.showLoader);

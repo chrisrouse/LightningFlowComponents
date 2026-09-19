@@ -6,7 +6,7 @@
         <title>Flow Auto Navigate — warning threshold treatments</title>
         <style>
             /* Standalone on purpose: no SLDS dependency, so this opens from
-               the filesystem. Colours are the SLDS values the real component
+               the filesystem. Colors are the SLDS values the real component
                would reach for via styling hooks. */
             :root {
                 --text: #181818;
@@ -187,18 +187,18 @@
                 display: none;
             }
 
-            /* ============ A — colour only ============ */
+            /* ============ A — color only ============ */
             .t-color.is-warning .timer {
                 color: var(--error);
             }
 
-            /* ============ B — colour + weight ============ */
+            /* ============ B — color + weight ============ */
             .t-weight.is-warning .timer {
                 color: var(--error);
                 font-weight: 800;
             }
 
-            /* ============ C — colour + icon + label change ============ */
+            /* ============ C — color + icon + label change ============ */
             .t-icon.is-warning .timer {
                 color: var(--error);
                 font-weight: 700;
@@ -297,39 +297,39 @@
             const TREATMENTS = [
                 {
                     key: "t-color",
-                    title: "A — Colour only",
+                    title: "A — Color only",
                     warnLabel: null,
-                    note: '<span class="flag flag--warn">WCAG</span> Fails <b>1.4.1 Use of Colour</b> on its own: colour is the only thing carrying the change. Cheapest, but not shippable alone.'
+                    note: '<span class="flag flag--warn">WCAG</span> Fails <b>1.4.1 Use of Color</b> on its own: color is the only thing carrying the change. Cheapest, but not shippable alone.'
                 },
                 {
                     key: "t-weight",
-                    title: "B — Colour + weight",
+                    title: "B — Color + weight",
                     warnLabel: null,
-                    note: '<span class="flag flag--ok">WCAG</span> Weight is a second, non-colour cue. Subtle though — easy to miss if you are not looking straight at it.'
+                    note: '<span class="flag flag--ok">WCAG</span> Weight is a second, non-color cue. Subtle though — easy to miss if you are not looking straight at it.'
                 },
                 {
                     key: "t-icon",
-                    title: "C — Colour + icon + label",
+                    title: "C — Color + icon + label",
                     warnLabel: "Advancing soon",
-                    note: '<span class="flag flag--ok">WCAG</span> Icon and changed wording both survive without colour. The label change is what a user actually reads. <b>My recommendation.</b>'
+                    note: '<span class="flag flag--ok">WCAG</span> Icon and changed wording both survive without color. The label change is what a user actually reads. <b>My recommendation.</b>'
                 },
                 {
                     key: "t-pulse",
                     title: "D — Pulse",
                     warnLabel: null,
-                    note: '<span class="flag flag--warn">Motion</span> Hardest to miss, most irritating. Honours <b>prefers-reduced-motion</b> here, which you must keep. Risky on a screen people are reading.'
+                    note: '<span class="flag flag--warn">Motion</span> Hardest to miss, most irritating. Honors <b>prefers-reduced-motion</b> here, which you must keep. Risky on a screen people are reading.'
                 },
                 {
                     key: "t-pill",
                     title: "E — Tinted pill",
                     warnLabel: "Advancing soon",
-                    note: '<span class="flag flag--ok">WCAG</span> Amber rather than red — reads as "heads up" not "error". Background shift is a strong non-colour-only cue. Contrast is controlled.'
+                    note: '<span class="flag flag--ok">WCAG</span> Amber rather than red — reads as "heads up" not "error". Background shift is a strong non-color-only cue. Contrast is controlled.'
                 },
                 {
                     key: "t-bar",
                     title: "F — Progress bar only",
                     warnLabel: null,
-                    note: '<span class="flag flag--warn">WCAG</span> Colour-only again, and the bar is <code>aria-hidden</code>, so assistive tech gets nothing extra. Fine <i>combined</i> with B, C or E.'
+                    note: '<span class="flag flag--warn">WCAG</span> Color-only again, and the bar is <code>aria-hidden</code>, so assistive tech gets nothing extra. Fine <i>combined</i> with B, C or E.'
                 }
             ];
 

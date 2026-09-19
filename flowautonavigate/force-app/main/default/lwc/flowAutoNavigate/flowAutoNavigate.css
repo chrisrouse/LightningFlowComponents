@@ -10,7 +10,7 @@
        horizontally as the numerals change. */
     font-variant-numeric: tabular-nums;
     /* inline-flex so the warning icon sits on the baseline with the digits
-       and the whole thing still centres. */
+       and the whole thing still centers. */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -22,7 +22,7 @@
         background-color 0.2s ease;
 }
 
-/* The timer is inline-flex, so it needs a block parent to centre against. */
+/* The timer is inline-flex, so it needs a block parent to center against. */
 :host {
     display: block;
     text-align: center;
@@ -99,7 +99,7 @@
  *
  * SLDS blueprint markup we own, not lightning-progress-bar. The base
  * component keeps its fill in its own shadow root, which put both the
- * transition and the warning colour out of reach -- the bar stepped once a
+ * transition and the warning color out of reach -- the bar stepped once a
  * second and the tint never applied. Owning the element fixes both with
  * ordinary CSS.
  * ------------------------------------------------------------------ */
