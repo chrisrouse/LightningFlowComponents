@@ -872,3 +872,62 @@ describe("bottom spacing", () => {
         expect(element.shadowRoot.querySelector(".slds-assistive-text")).not.toBeNull();
     });
 });
+
+describe("hide when time runs out", () => {
+    function content(element) {
+        return element.shadowRoot.querySelector(".auto-navigate__content");
+    }
+
+    it("stays visible while the timer runs", async () => {
+        const element = build({ seconds: 10, showTimer: true, hideOnExpiry: true, timeoutAction: "Stay" });
+
+        elapse(5_000);
+        await Promise.resolve();
+
+        expect(content(element).classList).not.toContain("auto-navigate__content_hidden");
+    });
+
+    /**
+     * Hidden but still occupying its space -- the point of the option is that
+     * nothing below the timer jumps up at the moment it expires.
+     */
+    it("hides without collapsing once the timer expires", async () => {
+        const element = build({ seconds: 10, showTimer: true, hideOnExpiry: true, timeoutAction: "Stay" });
+
+        elapse(10_000);
+        await Promise.resolve();
+
+        expect(content(element)).not.toBeNull();
+        expect(content(element).classList).toContain("auto-navigate__content_hidden");
+    });
+
+    it("leaves the timer on screen when the option is off", async () => {
+        const element = build({ seconds: 10, showTimer: true, timeoutAction: "Stay" });
+
+        elapse(10_000);
+        await Promise.resolve();
+
+        expect(content(element).classList).not.toContain("auto-navigate__content_hidden");
+    });
+
+    it("comes back when the timer is reset", async () => {
+        const element = build({
+            seconds: 10,
+            showTimer: true,
+            showReset: true,
+            hideOnExpiry: true,
+            timeoutAction: "Stay"
+        });
+
+        elapse(10_000);
+        await Promise.resolve();
+        expect(content(element).classList).toContain("auto-navigate__content_hidden");
+
+        // Reset is inside the hidden block, so a flow would drive this from
+        // elsewhere -- but the component must still recover cleanly.
+        element.shadowRoot.querySelector("lightning-button").dispatchEvent(new CustomEvent("click"));
+        await Promise.resolve();
+
+        expect(content(element).classList).not.toContain("auto-navigate__content_hidden");
+    });
+});

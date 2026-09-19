@@ -161,6 +161,16 @@
                 checked={showLoader}
                 onchange={handleCheckbox}
             ></lightning-input>
+
+            <lightning-input
+                type="checkbox"
+                data-validatable
+                data-property="hideOnExpiry"
+                label="Hide When Time Runs Out"
+                field-level-help="Hides the timer once it expires while keeping its space, so nothing below it jumps. Use this rather than a visibility condition on Timer Expired -- a component cannot drive its own visibility from its own output."
+                checked={hideOnExpiry}
+                onchange={handleCheckbox}
+            ></lightning-input>
         </div>
 
         <!-- Time running out. The threshold gates the rest of the group: with

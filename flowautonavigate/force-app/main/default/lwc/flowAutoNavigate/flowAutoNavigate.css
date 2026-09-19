@@ -32,6 +32,13 @@
     --slds-c-icon-color-foreground-default: currentColor;
 }
 
+.auto-navigate__content_hidden {
+    /* visibility, not display: the block keeps its footprint so nothing below
+       it jumps up at the moment the timer expires. It also drops out of the
+       accessibility tree, which is what we want once it has nothing to say. */
+    visibility: hidden;
+}
+
 .auto-navigate__loader {
     /* The spinner is absolutely positioned; without a height its container
        collapses and the spinner overlaps whatever follows it. */

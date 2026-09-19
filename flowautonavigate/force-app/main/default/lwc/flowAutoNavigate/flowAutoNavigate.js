@@ -164,6 +164,17 @@ export default class FlowAutoNavigate extends LightningElement {
     @api showReset = false;
     @api showLoader = false;
     @api showProgressBar = false;
+    /**
+     * Hide the component once the timer expires, without collapsing it.
+     *
+     * This exists because the obvious approach does not work: putting a Flow
+     * visibility condition on this component's own `timerExpired` output is
+     * circular. Flow evaluates the condition before the component mounts, so
+     * the output is still unset, the condition fails, the component never
+     * renders, and it therefore never reports a value -- it simply never
+     * appears. Driving a *different* component from the output is fine.
+     */
+    @api hideOnExpiry = false;
     @api timerLabel;
     @api timerDirection = DIRECTION.DOWN;
 
@@ -559,6 +570,15 @@ export default class FlowAutoNavigate extends LightningElement {
      */
     get hasVisibleContent() {
         return Boolean(this.showTimer || this.showProgressBar || this.showLoader);
+    }
+
+    /**
+     * `visibility: hidden` rather than removing the element, so the space it
+     * occupied is kept and nothing below it jumps up when the timer expires.
+     */
+    get contentClass() {
+        const base = "auto-navigate__content slds-m-bottom_x-small";
+        return this.hideOnExpiry && this._timerExpired ? `${base} auto-navigate__content_hidden` : base;
     }
 
     get loaderAlternativeText() {

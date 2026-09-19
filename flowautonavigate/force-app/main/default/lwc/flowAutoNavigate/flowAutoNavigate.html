@@ -15,7 +15,7 @@
          no phantom gap: with every display option off there is nothing here
          but the assistive text, which takes no space. -->
     <template lwc:if={hasVisibleContent}>
-        <div class="auto-navigate__content slds-m-bottom_x-small">
+        <div class={contentClass}>
             <template lwc:if={showTimer}>
                 <!-- role="timer" carries an implicit aria-live="off", which is
                      what we want: a value that changes every second announced
