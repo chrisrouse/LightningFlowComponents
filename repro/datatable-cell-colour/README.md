@@ -72,7 +72,7 @@ sf project deploy start --source-dir force-app
 | Lightning page, SLDS 1 | 2026-09-19 | matches Flow debug |
 | Lightning page, SLDS 2 light | 2026-09-19 | **different colours, same meanings** |
 | Lightning page, SLDS 2 dark | 2026-09-19 | **different colours, some inverted** |
-| LWR Experience site | pending | — |
+| LWR Experience site | 2026-09-19 | **fourth rendering; text colour flips to black** |
 
 ## The headline: the palette is NOT fixed, and that is a feature
 
@@ -189,9 +189,46 @@ So there is **no separate icon colour**, and no control for one. The icon takes
 the cell's colour, which is also the honest behaviour — an icon in a different
 colour from its own text would be a strange thing to offer.
 
-### Still unconfirmed
+### 7. LWR Experience site — a fourth rendering
 
-**LWR Experience site.** A branding set restyles SLDS, so `slds-theme_success`
-is not guaranteed to be legible for a site visitor. Given the SLDS 2 result
-above — where `slds-theme_warning` loses its background entirely — the range of
-what a site can do to these classes is wider than first assumed.
+Every class still resolves; nothing is dead in a site. But it is different again,
+and one difference matters:
+
+**`slds-theme_success` and `slds-theme_warning` render with BLACK text**, where
+SLDS 1 gave them white. The branding set moves the background and the foreground
+independently. Here the result is legible — black on light green reads fine —
+but nothing guarantees that, and we cannot inspect a customer's branding set.
+
+**`slds-theme_info` is effectively invisible in LWR** — a near-white grey, barely
+distinguishable from an unformatted cell. In SLDS 1 it was solid mid-grey with
+white text. It is too unreliable to offer.
+
+`slds-text-color_inverse` is blank here too: invisible on three of four surfaces.
+
+`fgridProbeCustom` is unstyled on all four surfaces. The shadow-root boundary is
+not surface-specific.
+
+## Conclusion — the palette to offer
+
+Measured across Flow debug, SLDS 1, SLDS 2 light, SLDS 2 dark and LWR:
+
+| Offer | Class | Why |
+| --- | --- | --- |
+| Success | `slds-theme_success` | reads positive on all five |
+| Warning | `slds-theme_warning` | reads caution on all five; no background under SLDS 2 light |
+| Error | `slds-theme_error` | reads bad on all five |
+| Inverse | `slds-theme_inverse` | the only consistently HIGH-CONTRAST option |
+| Subtle | `slds-theme_shade` | light grey everywhere; the quiet option |
+
+Dropped: `slds-theme_info` (invisible in LWR), `slds-theme_default` and
+`slds-theme_alt-inverse` (duplicates of None and Inverse), `slds-badge_success`
+and `slds-box_xx-small` (no effect anywhere).
+
+Text-only: Success, Error, Muted (`_weak`), Default. **Exclude `_inverse`.**
+
+### The one thing to tell admins
+
+Colour follows the running theme and, in a site, the branding set. Flow Grid
+picks the meaning; the platform picks the pixels. That is why the control says
+"Success" and not "Green", and why Grid Studio's preview must render live —
+a fixed swatch in the editor would be lying on four surfaces out of five.
