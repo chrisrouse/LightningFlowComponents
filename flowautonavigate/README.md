@@ -138,8 +138,9 @@ standard record page or in a site — and it reloads the whole tab, which
 restarts any flow running on the refreshed page. `RefreshEvent` refreshes
 registered components in place, so a flow survives it.
 
-Pair it with **On Timeout = Stay on This Screen** and a Reset to poll: refresh
-on an interval while the user stays put.
+Pair it with **On Timeout = Stay on This Screen** to refresh without leaving
+the screen. Note this fires **once**: the timer stops at zero, and only Reset
+or unpausing restarts it. There is no repeat, so this is not interval polling.
 
 No container setup is needed. The guide is explicit: "If you're adding a
 component to an active page, you don't need to create a container to receive
