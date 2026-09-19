@@ -68,15 +68,52 @@ sf project deploy start --source-dir force-app
 
 | Surface | Run | Result |
 | --- | --- | --- |
-| Flow Builder debug | 2026-09-19 | below |
-| Lightning app/home page | pending | — |
+| Flow Builder debug | 2026-09-19 | SLDS 1 rendering, below |
+| Lightning page, SLDS 1 | 2026-09-19 | matches Flow debug |
+| Lightning page, SLDS 2 light | 2026-09-19 | **different colours, same meanings** |
+| Lightning page, SLDS 2 dark | 2026-09-19 | **different colours, some inverted** |
 | LWR Experience site | pending | — |
 
-**The LWR run is the one that can still change the answer.** A site's branding
-set restyles SLDS themes, so `slds-theme_success` is not guaranteed to be the
-same green — or to stay legible — for a site visitor. That is the same class of
-surprise as the modal close button taking the branding set's tertiary button
-colour. Do not finalise the palette on the Flow debug result alone.
+## The headline: the palette is NOT fixed, and that is a feature
+
+The same class renders differently under SLDS 1, SLDS 2 light and SLDS 2 dark:
+
+| Class | SLDS 1 | SLDS 2 light | SLDS 2 dark |
+| --- | --- | --- | --- |
+| `slds-theme_success` | green bg, white text | pale mint bg, dark green text | teal bg, white text |
+| `slds-theme_warning` | orange bg, white text | **no bg**, orange text | rust bg, white text |
+| `slds-theme_error` | red bg, white text | pale pink bg, red text | magenta bg, white text |
+| `slds-theme_info` | grey bg, white text | pale blue bg, blue text | **blue** bg, white text |
+| `slds-theme_inverse` | dark navy, white text | dark navy, white text | **pale blue, dark text** |
+
+**What survives every theme is the MEANING, not the colour.** Success always
+reads as positive, error as bad, warning as caution. The hue, the lightness, and
+whether there is a background at all are the platform's business.
+
+Two consequences for the rule editor:
+
+1. **Offer semantic names, never colour names.** "Success", not "Green" — a
+   control labelled Green that renders pale mint, or teal, is simply wrong. The
+   preview in Grid Studio then has to render live rather than draw a swatch.
+2. **`slds-theme_inverse` inverts.** It is dark-on-light in SLDS 1 and light
+   themes and light-on-dark in dark mode, so it cannot be labelled "Dark". It is
+   "Inverse" — the opposite of whatever the page currently is.
+
+### This is the argument FOR Option A, not a cost of it
+
+Option B would hard-code Salesforce's six hexes. `#2E844A` green is a fixed
+colour: it would stay exactly that in dark mode, on a dark background, looking
+broken — and it could never become pale mint under SLDS 2 light.
+
+Going through SLDS classes means **the platform re-themes our conditional
+formatting for free**, including dark mode. That reverses the earlier framing in
+this README: Option B is not an upgrade waiting to happen, it is a trade of
+theme adaptability for two extra hues. Worth it only if blue and purple turn out
+to matter more than dark mode does.
+
+(Salesforce's own conditional formatting stores fixed hex, so it presumably has
+exactly this problem. Not our concern, but it says the fixed-palette approach is
+not obviously the considered one.)
 
 ### Flow Builder debug, 2026-09-19
 
@@ -141,9 +178,20 @@ The six native colours rendered exactly in the probe's own markup. A custom cell
 type would get the full palette — this confirms the upgrade path is real, and
 that its only true cost is re-rendering the value (see Flow Grid STATUS §2.3d).
 
+### 6. The icon follows the text colour — ANSWERED
+
+Readable in the SLDS 2 light capture, where text colours are strong against a
+pale background: the icon on `slds-text-color_success` is green, on
+`slds-text-color_error` is red, and on the themed rows it matches whatever the
+theme set the text to.
+
+So there is **no separate icon colour**, and no control for one. The icon takes
+the cell's colour, which is also the honest behaviour — an icon in a different
+colour from its own text would be a strange thing to offer.
+
 ### Still unconfirmed
 
-Whether the **icon** takes its colour from the cell's class. The icons render in
-every row and appear to follow the text colour, but they are too small in the
-captured screenshot to call with confidence. Confirm before deciding whether
-"Icon colour" is a control or a doc note.
+**LWR Experience site.** A branding set restyles SLDS, so `slds-theme_success`
+is not guaranteed to be legible for a site visitor. Given the SLDS 2 result
+above — where `slds-theme_warning` loses its background entirely — the range of
+what a site can do to these classes is wider than first assumed.
