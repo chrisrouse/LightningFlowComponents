@@ -25,18 +25,37 @@ of zero.
 
 ### Timing
 
-| Property    | Type    | Notes                                                              |
-| ----------- | ------- | ------------------------------------------------------------------ |
-| Hours       | Integer | Summed with the two below. Leave blank for none.                   |
-| Minutes     | Integer |                                                                    |
-| Seconds     | Integer |                                                                    |
-| On Timeout  | String  | `Next` (default), `Back`, `Finish`, `Pause`, `Stay`. See below.    |
-| Pause Timer | Boolean | Optional. Bind a Boolean **resource**; the timer holds while true. |
+| Property                  | Type    | Notes                                                             |
+| ------------------------- | ------- | ----------------------------------------------------------------- |
+| Hours                     | Integer | Summed with the two below. Leave blank for none.                  |
+| Minutes                   | Integer |                                                                   |
+| Seconds                   | Integer |                                                                   |
+| On Timeout                | String  | `Next` (default), `Back`, `Finish`, `Pause`, `Stay`. See below.   |
+| Advance When This Is True | Boolean | Optional **resource**. Completes on a trigger instead of a timer. |
+| Pause Timer               | Boolean | Optional **resource**; the timer holds while true.                |
 
 `Next` falls back to finishing the flow on a last screen — that was the original
 behavior. An explicitly chosen `Back`, `Finish` or `Pause` does **not** fall
 back; if the flow does not offer it, nothing happens. Quietly doing something
 other than what you asked for is worse than doing nothing.
+
+### Completing without a timer
+
+**Advance When This Is True** runs the On Timeout action — including the
+refresh — as soon as the bound Boolean becomes true, with no timer involved.
+Bind another component's output: a file upload's content document link
+arriving, a callout finishing, a checkbox being ticked.
+
+With it bound, the duration becomes optional:
+
+| Configuration | Behavior                                                        |
+| ------------- | --------------------------------------------------------------- |
+| Duration only | Completes on the clock, as before.                              |
+| Trigger only  | Completes when the trigger fires. No timer runs.                |
+| Both          | Whichever happens first wins — the duration acts as a backstop. |
+
+The trigger takes the same path as expiry, so `triggered`, `timerExpired`, the
+refresh and the On Timeout action all behave identically. It fires once.
 
 `Pause Timer` is resource-only on purpose: a literal `true` would hold the timer
 forever. Bind a checkbox or formula on the same screen and the timer stops and

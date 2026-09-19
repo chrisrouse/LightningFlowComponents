@@ -17,8 +17,9 @@
             <property name="timeoutSeconds" type="Integer" label="Seconds" role="inputOnly" />
             <property name="timeoutAction" type="String" label="On Timeout" role="inputOnly" />
 
-            <!-- Reactive: bind to a Flow resource that changes on this screen
-                 and the timer holds and resumes as it flips. -->
+            <!-- Reactive: bind to Flow resources that change on this screen.
+                 advanceWhen completes immediately; paused holds and resumes. -->
+            <property name="advanceWhen" type="Boolean" label="Advance When This Is True" role="inputOnly" />
             <property name="paused" type="Boolean" label="Pause Timer" role="inputOnly" />
 
             <property name="showTimer" type="Boolean" label="Show Timer" role="inputOnly" />

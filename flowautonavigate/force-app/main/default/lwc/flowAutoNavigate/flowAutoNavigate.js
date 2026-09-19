@@ -234,6 +234,7 @@ export default class FlowAutoNavigate extends LightningElement {
 
     _triggered = false;
     _timerExpired = false;
+    _advanceWhen = false;
     _paused = false;
     _started = false;
     _deadline = 0;
@@ -279,6 +280,35 @@ export default class FlowAutoNavigate extends LightningElement {
      * and starts as that value changes. Before `connectedCallback` this only
      * records the flag; `start()` honors it.
      */
+    /**
+     * Reactive: run the On Timeout action as soon as this becomes true,
+     * without waiting for the timer.
+     *
+     * Bind a Flow Boolean or another component's output -- a file upload's
+     * content document link arriving, a callout finishing, a checkbox being
+     * ticked. The timer then becomes optional: leave the duration blank to
+     * advance purely on the trigger, or set one as a backstop, in which case
+     * whichever fires first wins.
+     *
+     * Same setter mechanism as `paused`, which is verified working under Flow
+     * reactive screens.
+     */
+    @api
+    get advanceWhen() {
+        return this._advanceWhen;
+    }
+    set advanceWhen(value) {
+        const next = Boolean(value);
+        if (next === this._advanceWhen) {
+            return;
+        }
+        this._advanceWhen = next;
+        // Before `start()` this only records the flag; `start()` honors it.
+        if (this._started && next) {
+            this.expire();
+        }
+    }
+
     @api
     get paused() {
         return this._paused;
@@ -337,6 +367,15 @@ export default class FlowAutoNavigate extends LightningElement {
     start() {
         this._durationMs = this.durationMs;
         this._started = true;
+
+        // Already true when the screen loaded: complete without ever ticking.
+        if (this._advanceWhen) {
+            this.expire();
+            return;
+        }
+
+        // No duration is not an error when a trigger is configured -- the
+        // component simply waits for it instead of for the clock.
         if (this._durationMs <= 0) {
             return;
         }

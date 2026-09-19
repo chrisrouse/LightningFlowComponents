@@ -263,11 +263,19 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
     }
 
     /** Held as a `{!Reference}`, which is the form the resource picker expects. */
-    get paused() {
-        if (Object.prototype.hasOwnProperty.call(this.pending, "paused")) {
-            return this.pending.paused;
+    resolveReference(name) {
+        if (Object.prototype.hasOwnProperty.call(this.pending, name)) {
+            return this.pending[name];
         }
-        return this.reference("paused", null);
+        return this.reference(name, null);
+    }
+
+    get paused() {
+        return this.resolveReference("paused");
+    }
+
+    get advanceWhen() {
+        return this.resolveReference("advanceWhen");
     }
 
     get timerDirection() {
@@ -360,10 +368,14 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         this.commit(event.target.dataset.property, event.detail.value, "String");
     }
 
-    /** Resource-only: a literal `true` here would pause the timer forever. */
-    handlePausedChange(event) {
-        const { newValue, newValueDataType } = event.detail;
-        this.commit("paused", newValue, newValueDataType || "reference");
+    /**
+     * Both Boolean inputs are resource-only: a hardcoded value would pause the
+     * timer forever, or fire the trigger on load. The property comes off the
+     * event so one handler serves both pickers.
+     */
+    handleResourceChange(event) {
+        const { name, newValue, newValueDataType } = event.detail;
+        this.commit(name, newValue, newValueDataType || "reference");
     }
 
     /** The value input carries its own data type; this may be a Flow reference. */
@@ -377,10 +389,21 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
      * ------------------------------------------------------------------ */
 
     validateConfiguration() {
+        // A duration is only required when nothing else can complete the
+        // screen. With Advance When This Is True bound, the trigger is the
+        // timer, and a duration is an optional backstop.
         if (this.totalSeconds <= 0) {
+            if (this.advanceWhen) {
+                return [];
+            }
             // Anchored on Seconds because it is the field an admin filling this
             // in for the first time is most likely to reach for.
-            return [{ key: "timeoutSeconds", errorString: "Enter a duration greater than zero." }];
+            return [
+                {
+                    key: "timeoutSeconds",
+                    errorString: "Enter a duration greater than zero, or bind Advance When This Is True."
+                }
+            ];
         }
 
         // A threshold at or above the total means the warning treatment is on

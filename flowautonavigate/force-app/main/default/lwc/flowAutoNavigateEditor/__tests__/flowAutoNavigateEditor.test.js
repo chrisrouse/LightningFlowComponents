@@ -149,7 +149,10 @@ describe("duration summary", () => {
 describe("validation", () => {
     it("rejects a configuration with no duration", () => {
         expect(build().validate()).toEqual([
-            { key: "timeoutSeconds", errorString: "Enter a duration greater than zero." }
+            {
+                key: "timeoutSeconds",
+                errorString: "Enter a duration greater than zero, or bind Advance When This Is True."
+            }
         ]);
     });
 
@@ -384,5 +387,46 @@ describe("page refresh option", () => {
         await Promise.resolve();
 
         expect(details).toEqual([{ name: "refreshOnTimeout", newValue: true, newValueDataType: "Boolean" }]);
+    });
+});
+
+describe("advance trigger", () => {
+    it("takes a Boolean resource and refuses a literal", () => {
+        const picker = control(build(), "advanceWhen");
+
+        expect(picker.tagName.toLowerCase()).toBe("c-flow-config-resource-picker");
+        expect(picker.acceptedTypes).toBe("Boolean");
+    });
+
+    /** A trigger replaces the timer, so a duration is no longer mandatory. */
+    it("accepts a configuration with a trigger and no duration", () => {
+        const element = build({
+            inputVariables: [{ name: "advanceWhen", value: "fileUploaded", valueDataType: "reference" }]
+        });
+
+        expect(element.validate()).toEqual([]);
+    });
+
+    it("still demands a duration when nothing else can complete the screen", () => {
+        expect(build().validate()).toEqual([
+            {
+                key: "timeoutSeconds",
+                errorString: "Enter a duration greater than zero, or bind Advance When This Is True."
+            }
+        ]);
+    });
+
+    it("publishes the reference the admin picked", async () => {
+        const element = build();
+        const details = captureInputs(element);
+
+        control(element, "advanceWhen").dispatchEvent(
+            new CustomEvent("resourcechange", {
+                detail: { name: "advanceWhen", newValue: "{!fileUploaded}", newValueDataType: "reference" }
+            })
+        );
+        await Promise.resolve();
+
+        expect(details).toEqual([{ name: "advanceWhen", newValue: "{!fileUploaded}", newValueDataType: "reference" }]);
     });
 });

@@ -1070,3 +1070,104 @@ describe("record refresh in Experience Cloud", () => {
         expect(types(events)).toContain(NEXT);
     });
 });
+
+describe("advancing on an external trigger", () => {
+    /**
+     * The upload case: no timer at all, advance as soon as another component
+     * reports it is done.
+     */
+    it("advances with no duration configured", () => {
+        const element = build({ availableActions: ["NEXT"] });
+        const events = captureEvents(element);
+
+        elapse(600_000);
+        expect(events).toEqual([]);
+
+        element.advanceWhen = true;
+
+        expect(types(events)).toContain(NEXT);
+    });
+
+    it("advances immediately when the trigger is already true on load", () => {
+        // Completion happens inside connectedCallback, so the listener has to
+        // be attached before the element is appended or it misses everything.
+        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        element.availableActions = ["NEXT"];
+        element.advanceWhen = true;
+        const seen = [];
+        element.addEventListener(NEXT, () => seen.push(NEXT));
+        document.body.appendChild(element);
+
+        expect(element.triggered).toBe(true);
+        expect(seen).toEqual([NEXT]);
+    });
+
+    it("beats a running timer when it fires first", () => {
+        const element = build({ seconds: 60 });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+        element.advanceWhen = true;
+
+        expect(types(events)).toContain(NEXT);
+    });
+
+    /** A duration alongside a trigger is a backstop, and still works. */
+    it("still expires on the timer when the trigger never fires", () => {
+        const element = build({ seconds: 10 });
+        const events = captureEvents(element);
+
+        elapse(10_000);
+
+        expect(types(events)).toContain(NEXT);
+    });
+
+    it("completes only once when the trigger fires after the timer", () => {
+        const element = build({ seconds: 5 });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+        element.advanceWhen = true;
+
+        expect(types(events).filter((t) => t === NEXT)).toHaveLength(1);
+    });
+
+    it("runs the configured action, not just Next", () => {
+        const element = build({ timeoutAction: "Finish", availableActions: ["NEXT", "FINISH"] });
+        const events = captureEvents(element);
+
+        element.advanceWhen = true;
+
+        expect(types(events)).toContain(FINISH);
+    });
+
+    it("refreshes on the trigger too", () => {
+        const element = build({ refreshOnTimeout: true, refreshRecordId: "001000000000001AAA" });
+        const events = captureEvents(element);
+
+        element.advanceWhen = true;
+
+        expect(types(events)).toContain(REFRESH);
+        expect(notifyRecordUpdateAvailable).toHaveBeenCalledWith([{ recordId: "001000000000001AAA" }]);
+    });
+
+    it("stays on the screen when told to, reporting the outputs", () => {
+        const element = build({ timeoutAction: "Stay" });
+        const events = captureEvents(element);
+
+        element.advanceWhen = true;
+
+        expect(element.timerExpired).toBe(true);
+        expect(types(events)).not.toContain(NEXT);
+    });
+
+    it("does nothing while the trigger stays false", () => {
+        const element = build({});
+        const events = captureEvents(element);
+
+        element.advanceWhen = false;
+        elapse(600_000);
+
+        expect(events).toEqual([]);
+    });
+});
