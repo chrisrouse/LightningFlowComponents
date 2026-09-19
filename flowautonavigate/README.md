@@ -53,6 +53,7 @@ starts as it changes, keeping the time already served rather than restarting.
 | Show Progress Bar       | Boolean | Depletes counting down, fills counting up.                   |
 | Show Loader             | Boolean | A spinner. Suggests loading; prefer the progress bar.        |
 | Hide When Time Runs Out | Boolean | Hides the component on expiry, keeping its space. See below. |
+| Hide When This Is True  | Boolean | Optional. Bind a Boolean **resource**; hides while true.     |
 
 ### Time running out
 
@@ -110,9 +111,22 @@ evaluates the condition before the component mounts, so the output is still
 unset, the condition fails, the component never renders, and it therefore never
 reports a value. It is circular.
 
-Use **Hide When Time Runs Out** instead. It applies `visibility: hidden` to the
-component's content on expiry, so the timer disappears but its space is kept
-and nothing below it jumps up.
+Use one of the two hide properties instead. Both apply `visibility: hidden` to
+the component's content, so it disappears but keeps its space and nothing below
+it jumps up.
+
+- **Hide When Time Runs Out** — a checkbox, for the self-contained case. This is
+  the only way to get hide-on-expiry, because the external route is the
+  circular one described above.
+- **Hide When This Is True** — a reactive Boolean **resource**: a Flow variable,
+  a formula, or another component's output. Hides while true and reappears when
+  it goes false. Resource-only on purpose; a hardcoded `true` would hide the
+  component forever, which a Flow visibility condition already does better.
+
+They combine rather than override — either one being true hides the component.
+
+Hiding is visual only. The timer keeps running and **still advances the
+screen**; bind `Pause Timer` if you want the clock held as well.
 
 Driving a _different_ component from `timerExpired` is fine and is the intended
 use — that is the Stay pattern above.

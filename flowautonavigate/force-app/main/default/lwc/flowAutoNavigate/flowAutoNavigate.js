@@ -175,6 +175,16 @@ export default class FlowAutoNavigate extends LightningElement {
      * appears. Driving a *different* component from the output is fine.
      */
     @api hideOnExpiry = false;
+
+    /**
+     * Reactive: hide the component while this is true, whatever the timer is
+     * doing. Bind a Flow Boolean or another component's output.
+     *
+     * Hiding is visual only. The timer keeps running and will still advance
+     * the screen -- hiding it is not the same as pausing it, and `paused` is
+     * the property for that.
+     */
+    @api hideWhen = false;
     @api timerLabel;
     @api timerDirection = DIRECTION.DOWN;
 
@@ -578,7 +588,8 @@ export default class FlowAutoNavigate extends LightningElement {
      */
     get contentClass() {
         const base = "auto-navigate__content slds-m-bottom_x-small";
-        return this.hideOnExpiry && this._timerExpired ? `${base} auto-navigate__content_hidden` : base;
+        const hidden = Boolean(this.hideWhen) || (this.hideOnExpiry && this._timerExpired);
+        return hidden ? `${base} auto-navigate__content_hidden` : base;
     }
 
     get loaderAlternativeText() {

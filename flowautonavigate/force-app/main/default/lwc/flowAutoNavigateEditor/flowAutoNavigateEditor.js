@@ -245,11 +245,19 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
     }
 
     /** Held as a `{!Reference}`, which is the form the resource picker expects. */
-    get paused() {
-        if (Object.prototype.hasOwnProperty.call(this.pending, "paused")) {
-            return this.pending.paused;
+    resolveReference(name) {
+        if (Object.prototype.hasOwnProperty.call(this.pending, name)) {
+            return this.pending[name];
         }
-        return this.reference("paused", null);
+        return this.reference(name, null);
+    }
+
+    get paused() {
+        return this.resolveReference("paused");
+    }
+
+    get hideWhen() {
+        return this.resolveReference("hideWhen");
     }
 
     get timerDirection() {
@@ -342,10 +350,14 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         this.commit(event.target.dataset.property, event.detail.value, "String");
     }
 
-    /** Resource-only: a literal `true` here would pause the timer forever. */
-    handlePausedChange(event) {
-        const { newValue, newValueDataType } = event.detail;
-        this.commit("paused", newValue, newValueDataType || "reference");
+    /**
+     * Both Boolean inputs are resource-only: a hardcoded `true` would pause
+     * the timer, or hide the component, permanently. The point of each is to
+     * follow a value that changes on the screen.
+     */
+    handleResourceChange(event) {
+        const { name, newValue, newValueDataType } = event.detail;
+        this.commit(name, newValue, newValueDataType || "reference");
     }
 
     /** The value input carries its own data type; this may be a Flow reference. */
