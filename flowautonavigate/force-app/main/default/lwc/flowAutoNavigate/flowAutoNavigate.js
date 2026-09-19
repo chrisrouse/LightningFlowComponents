@@ -551,6 +551,16 @@ export default class FlowAutoNavigate extends LightningElement {
         return Boolean(this.warningActive && this.warningShowIcon);
     }
 
+    /**
+     * Whether anything occupying space renders.
+     *
+     * Gates the bottom margin, so a component set to advance silently does not
+     * push its neighbour down by half a rem for nothing.
+     */
+    get hasVisibleContent() {
+        return Boolean(this.showTimer || this.showProgressBar || this.showLoader);
+    }
+
     get loaderAlternativeText() {
         return this.timerLabel || "Waiting to continue";
     }

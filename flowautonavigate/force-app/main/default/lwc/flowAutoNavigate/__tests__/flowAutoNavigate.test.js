@@ -833,3 +833,42 @@ describe("warning threshold entry", () => {
         expect(timer(element).className).toContain("auto-navigate__timer_weight");
     });
 });
+
+describe("bottom spacing", () => {
+    function content(element) {
+        return element.shadowRoot.querySelector(".auto-navigate__content");
+    }
+
+    /**
+     * Flow wraps each of its own screen fields in `container
+     * slds-m-bottom_x-small`, but that div belongs to flowruntime-lwc-field.
+     * We reproduce the margin so this component sits in the same rhythm as the
+     * fields around it.
+     */
+    it("carries the same bottom margin Flow gives its own fields", async () => {
+        const element = build({ seconds: 10, showTimer: true });
+        await Promise.resolve();
+
+        expect(content(element).classList).toContain("slds-m-bottom_x-small");
+    });
+
+    it.each([
+        ["the timer", { showTimer: true }],
+        ["the progress bar", { showProgressBar: true }],
+        ["the loader", { showLoader: true }]
+    ])("spaces the component when %s is shown", async (_label, options) => {
+        const element = build({ seconds: 10, ...options });
+        await Promise.resolve();
+
+        expect(content(element)).not.toBeNull();
+    });
+
+    it("adds no phantom gap when the component advances silently", async () => {
+        const element = build({ seconds: 10 });
+        await Promise.resolve();
+
+        expect(content(element)).toBeNull();
+        // The announcement still renders; slds-assistive-text takes no space.
+        expect(element.shadowRoot.querySelector(".slds-assistive-text")).not.toBeNull();
+    });
+});
