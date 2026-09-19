@@ -272,25 +272,6 @@ describe("timeout action", () => {
         expect(types(events)).not.toContain(NEXT);
     });
 
-    it("finishes when Finish is chosen", () => {
-        const element = build({ seconds: 5, timeoutAction: "Finish", availableActions: ["NEXT", "FINISH"] });
-        const events = captureEvents(element);
-
-        elapse(5_000);
-
-        expect(types(events)).toContain(FINISH);
-        expect(types(events)).not.toContain(NEXT);
-    });
-
-    it("pauses the flow when Pause is chosen", () => {
-        const element = build({ seconds: 5, timeoutAction: "Pause", availableActions: ["NEXT", "PAUSE"] });
-        const events = captureEvents(element);
-
-        elapse(5_000);
-
-        expect(types(events)).toContain(PAUSE);
-    });
-
     /**
      * An explicit choice does not fall back. Quietly doing something other than
      * what the admin asked for is worse than doing nothing, and `triggered`
@@ -298,6 +279,21 @@ describe("timeout action", () => {
      */
     it("does nothing when an explicitly chosen action is unavailable", () => {
         const element = build({ seconds: 5, timeoutAction: "Back", availableActions: ["NEXT"] });
+        const events = captureEvents(element);
+
+        elapse(5_000);
+
+        expect(types(events)).toEqual([ATTRIBUTE_CHANGE, ATTRIBUTE_CHANGE]);
+        expect(element.triggered).toBe(true);
+    });
+
+    /**
+     * Finish and Pause were removed from the editor. A flow saved with one of
+     * them still loads, and must do nothing rather than pick some other
+     * action on the admin's behalf. `triggered` still reports the timeout.
+     */
+    it("does nothing for an action that is no longer offered", () => {
+        const element = build({ seconds: 5, timeoutAction: "Finish", availableActions: ["NEXT", "FINISH"] });
         const events = captureEvents(element);
 
         elapse(5_000);
@@ -1133,12 +1129,13 @@ describe("advancing on an external trigger", () => {
     });
 
     it("runs the configured action, not just Next", () => {
-        const element = build({ timeoutAction: "Finish", availableActions: ["NEXT", "FINISH"] });
+        const element = build({ timeoutAction: "Back", availableActions: ["NEXT", "BACK"] });
         const events = captureEvents(element);
 
         element.advanceWhen = true;
 
-        expect(types(events)).toContain(FINISH);
+        expect(types(events)).toContain(BACK);
+        expect(types(events)).not.toContain(NEXT);
     });
 
     it("refreshes on the trigger too", () => {

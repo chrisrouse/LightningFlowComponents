@@ -34,10 +34,16 @@ of zero.
 | Advance When This Is True | Boolean | Optional **resource**. Completes on a trigger instead of a timer. |
 | Pause Timer               | Boolean | Optional **resource**; the timer holds while true.                |
 
-`Next` falls back to finishing the flow on a last screen — that was the original
-behavior. An explicitly chosen `Back`, `Finish` or `Pause` does **not** fall
-back; if the flow does not offer it, nothing happens. Quietly doing something
-other than what you asked for is worse than doing nothing.
+`Next` falls back to finishing the flow on a last screen, which is the original
+behavior of this component — so **`Next` covers the finish case** and there is
+no separate Finish option. An explicitly chosen `Back` does **not** fall back;
+if the flow does not offer it, nothing happens. Quietly doing something other
+than what you asked for is worse than doing nothing.
+
+Finish and Pause were offered briefly and removed: Finish was redundant with
+`Next`, and Pause was not wanted. A flow still saved with either does nothing
+on timeout rather than guessing — `triggered` still reports that the timeout
+happened.
 
 ### Completing without a timer
 

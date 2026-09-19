@@ -195,8 +195,6 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         return [
             { label: "Go to Next Screen", value: "Next" },
             { label: "Go Back", value: "Back" },
-            { label: "Finish the Flow", value: "Finish" },
-            { label: "Pause the Flow", value: "Pause" },
             { label: "Stay on This Screen", value: "Stay" }
         ];
     }

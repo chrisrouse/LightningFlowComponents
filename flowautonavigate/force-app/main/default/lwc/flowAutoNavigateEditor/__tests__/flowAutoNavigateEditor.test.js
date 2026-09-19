@@ -245,19 +245,19 @@ describe("timeout action", () => {
         expect(details).toEqual([]);
     });
 
-    it("offers every flow navigation action, plus staying put", () => {
+    it("offers only the actions that work, plus staying put", () => {
         const values = control(build(), "timeoutAction").options.map((option) => option.value);
-        expect(values).toEqual(["Next", "Back", "Finish", "Pause", "Stay"]);
+        expect(values).toEqual(["Next", "Back", "Stay"]);
     });
 
     it("publishes the chosen action", async () => {
         const element = build();
         const details = captureInputs(element);
 
-        control(element, "timeoutAction").dispatchEvent(new CustomEvent("change", { detail: { value: "Finish" } }));
+        control(element, "timeoutAction").dispatchEvent(new CustomEvent("change", { detail: { value: "Back" } }));
         await Promise.resolve();
 
-        expect(details).toEqual([{ name: "timeoutAction", newValue: "Finish", newValueDataType: "String" }]);
+        expect(details).toEqual([{ name: "timeoutAction", newValue: "Back", newValueDataType: "String" }]);
     });
 });
 

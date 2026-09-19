@@ -18,8 +18,7 @@ import {
     FlowAttributeChangeEvent,
     FlowNavigationNextEvent,
     FlowNavigationBackEvent,
-    FlowNavigationFinishEvent,
-    FlowNavigationPauseEvent
+    FlowNavigationFinishEvent
 } from "lightning/flowSupport";
 import { RefreshEvent } from "lightning/refresh";
 import { notifyRecordUpdateAvailable } from "lightning/uiRecordApi";
@@ -42,18 +41,21 @@ export const DIRECTION = { DOWN: "Down", UP: "Up" };
 export const TIMEOUT_ACTION = {
     NEXT: "Next",
     BACK: "Back",
-    FINISH: "Finish",
-    PAUSE: "Pause",
     /** Expire in place: report the outputs and leave the screen standing. */
     STAY: "Stay"
 };
 
-/** Flow's own names for the actions it reports through `availableActions`. */
+/**
+ * Flow's own names for the actions it reports through `availableActions`.
+ *
+ * Finish and Pause were offered and removed: Finish did not work in testing,
+ * and Pause was not wanted. Finishing is still reachable, as the fallback
+ * from Next on a last screen, which is the original behavior of this
+ * component.
+ */
 const FLOW_ACTION = {
     [TIMEOUT_ACTION.NEXT]: "NEXT",
-    [TIMEOUT_ACTION.BACK]: "BACK",
-    [TIMEOUT_ACTION.FINISH]: "FINISH",
-    [TIMEOUT_ACTION.PAUSE]: "PAUSE"
+    [TIMEOUT_ACTION.BACK]: "BACK"
 };
 
 /**
@@ -558,10 +560,10 @@ export default class FlowAutoNavigate extends LightningElement {
     /**
      * The event for the configured action, or null when Flow does not offer it.
      *
-     * Next falls back to Finish because that is the last-screen case and was the
-     * original behavior. An explicitly chosen Back, Finish or Pause does not
-     * fall back -- silently doing something other than what the admin asked for
-     * is worse than doing nothing.
+     * Next falls back to Finish, because that is the last-screen case and is
+     * the original behavior of this component. An explicitly chosen Back does
+     * not fall back -- silently doing something other than what the admin
+     * asked for is worse than doing nothing.
      */
     navigationEvent() {
         const action = this.timeoutAction || TIMEOUT_ACTION.NEXT;
@@ -574,16 +576,10 @@ export default class FlowAutoNavigate extends LightningElement {
             return offered.includes("FINISH") ? new FlowNavigationFinishEvent() : null;
         }
 
-        if (!offered.includes(FLOW_ACTION[action])) {
-            return null;
-        }
-        if (action === TIMEOUT_ACTION.BACK) {
+        if (action === TIMEOUT_ACTION.BACK && offered.includes(FLOW_ACTION[action])) {
             return new FlowNavigationBackEvent();
         }
-        if (action === TIMEOUT_ACTION.FINISH) {
-            return new FlowNavigationFinishEvent();
-        }
-        return new FlowNavigationPauseEvent();
+        return null;
     }
 
     /**
