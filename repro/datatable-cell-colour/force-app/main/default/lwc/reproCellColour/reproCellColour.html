@@ -1,0 +1,33 @@
+<template>
+    <div class="slds-card slds-p-around_medium">
+        <h2 class="slds-text-heading_medium slds-m-bottom_x-small">Datatable cell colour probe</h2>
+        <p class="slds-text-body_small slds-m-bottom_small">
+            Each row applies one class through <code>cellAttributes.class</code>. Read the rendered colours: whatever
+            this table draws is the palette Flow Grid can offer through Option A.
+        </p>
+
+        <lightning-datatable
+            key-field="id"
+            columns={columns}
+            data={data}
+            hide-checkbox-column
+            column-widths-mode="auto"
+        ></lightning-datatable>
+
+        <!-- Option B's assumption, checked outside the datatable: our own markup,
+             our own shadow root, arbitrary hex. If the swatches below render in
+             the six native colours but the table above cannot, that is the whole
+             argument for the custom-cell-type upgrade in one screenshot. -->
+        <h3 class="slds-text-heading_small slds-m-top_medium slds-m-bottom_x-small">
+            For comparison — the six native colours, rendered in our own markup
+        </h3>
+        <div class="swatches">
+            <span class="swatch swatch_gray">Gray</span>
+            <span class="swatch swatch_blue">Blue</span>
+            <span class="swatch swatch_green">Green</span>
+            <span class="swatch swatch_orange">Orange</span>
+            <span class="swatch swatch_red">Red</span>
+            <span class="swatch swatch_purple">Purple</span>
+        </div>
+    </div>
+</template>

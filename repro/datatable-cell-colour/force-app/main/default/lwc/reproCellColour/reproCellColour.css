@@ -1,0 +1,43 @@
+/* The class the probe hands to cellAttributes to see whether OUR stylesheet
+   reaches inside lightning-datatable's shadow root. Expected not to: this file
+   is scoped to this component, and the cell is rendered by a different one.
+   Loud on purpose, so a pass or a fail is unmistakable in a screenshot. */
+.fgridProbeCustom {
+    background: #9050e9;
+    color: #ffffff;
+}
+
+/* The six colours Salesforce's own conditional formatting offers, taken from
+   the swatch markup in its colour picker. Rendered here in our own shadow root,
+   where inline colour is uncontroversial -- this is the Option B comparison. */
+.swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.swatch {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    color: #ffffff;
+    font-size: 0.8125rem;
+}
+
+.swatch_gray {
+    background: #747474;
+}
+.swatch_blue {
+    background: #0176d3;
+}
+.swatch_green {
+    background: #2e844a;
+}
+.swatch_orange {
+    background: #dd7a01;
+}
+.swatch_red {
+    background: #ba0517;
+}
+.swatch_purple {
+    background: #9050e9;
+}
