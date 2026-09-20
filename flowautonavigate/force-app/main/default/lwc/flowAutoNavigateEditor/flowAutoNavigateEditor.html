@@ -144,22 +144,21 @@
                          Detail on an LWR page does not participate in the
                          refresh tree and so ignores RefreshEvent. Notifying
                          LDS reaches its wire directly. -->
-                    <template lwc:if={refreshOnTimeout}>
-                        <c-flow-config-value-input
-                            data-validatable
-                            data-property="refreshRecordId"
-                            label="Record to Refresh"
-                            property-name="refreshRecordId"
-                            value={refreshRecordId}
-                            value-data-type={refreshRecordIdDataType}
-                            value-type="String"
-                            field-level-help='Use an input variable named "recordId" if using this component in Experience Cloud. Leave blank for Lightning Pages.'
-                            builder-context={builderContext}
-                            automatic-output-variables={automaticOutputVariables}
-                            api-version={apiVersion}
-                            onvaluechange={handleValueChange}
-                        ></c-flow-config-value-input>
-                    </template>
+                    <c-flow-auto-navigate-value-input
+                        data-validatable
+                        data-property="refreshRecordId"
+                        label="Record to Refresh"
+                        property-name="refreshRecordId"
+                        value={refreshRecordId}
+                        value-data-type={refreshRecordIdDataType}
+                        value-type="String"
+                        field-level-help='Use an input variable named "recordId" if using this component in Experience Cloud. Leave blank for Lightning Pages.'
+                        builder-context={builderContext}
+                        automatic-output-variables={automaticOutputVariables}
+                        api-version={apiVersion}
+                        onvaluechange={handleValueChange}
+                        disabled={refreshOptionsDisabled}
+                    ></c-flow-auto-navigate-value-input>
 
                     <lightning-input
                         type="checkbox"
@@ -219,23 +218,21 @@
                         onchange={handleCheckbox}
                     ></lightning-input>
 
-                    <template lwc:if={timerOptionsEnabled}>
-                        <c-flow-config-value-input
-                            data-validatable
-                            data-property="timerLabel"
-                            label="Message to Users"
-                            property-name="timerLabel"
-                            value={timerLabel}
-                            value-data-type={timerLabelDataType}
-                            value-type="String"
-                            disabled={timerOptionsDisabled}
-                            field-level-help="Shown with the timer. Accepts rich text or a Flow resource."
-                            builder-context={builderContext}
-                            automatic-output-variables={automaticOutputVariables}
-                            api-version={apiVersion}
-                            onvaluechange={handleValueChange}
-                        ></c-flow-config-value-input>
-                    </template>
+                    <c-flow-auto-navigate-value-input
+                        data-validatable
+                        data-property="timerLabel"
+                        label="Message to Users"
+                        property-name="timerLabel"
+                        value={timerLabel}
+                        value-data-type={timerLabelDataType}
+                        value-type="String"
+                        field-level-help="Shown with the timer. Accepts rich text or a Flow resource."
+                        builder-context={builderContext}
+                        automatic-output-variables={automaticOutputVariables}
+                        api-version={apiVersion}
+                        onvaluechange={handleValueChange}
+                        disabled={timerOptionsDisabled}
+                    ></c-flow-auto-navigate-value-input>
 
                     <lightning-combobox
                         data-validatable
@@ -340,23 +337,21 @@
                         onchange={handleSelect}
                     ></lightning-combobox>
 
-                    <template lwc:if={warningOptionsEnabled}>
-                        <c-flow-config-value-input
-                            data-validatable
-                            data-property="warningLabel"
-                            label="Warning Message"
-                            property-name="warningLabel"
-                            value={warningLabel}
-                            value-data-type={warningLabelDataType}
-                            value-type="String"
-                            disabled={warningOptionsDisabled}
-                            field-level-help="Replaces Message to Users once the warning starts, for example 'Advancing soon'. A wording change is the cue that survives without color."
-                            builder-context={builderContext}
-                            automatic-output-variables={automaticOutputVariables}
-                            api-version={apiVersion}
-                            onvaluechange={handleValueChange}
-                        ></c-flow-config-value-input>
-                    </template>
+                    <c-flow-auto-navigate-value-input
+                        data-validatable
+                        data-property="warningLabel"
+                        label="Warning Message"
+                        property-name="warningLabel"
+                        value={warningLabel}
+                        value-data-type={warningLabelDataType}
+                        value-type="String"
+                        field-level-help="Replaces Message to Users once the warning starts, for example 'Advancing soon'. A wording change is the cue that survives without color."
+                        builder-context={builderContext}
+                        automatic-output-variables={automaticOutputVariables}
+                        api-version={apiVersion}
+                        onvaluechange={handleValueChange}
+                        disabled={warningOptionsDisabled}
+                    ></c-flow-auto-navigate-value-input>
 
                     <lightning-input
                         type="checkbox"
