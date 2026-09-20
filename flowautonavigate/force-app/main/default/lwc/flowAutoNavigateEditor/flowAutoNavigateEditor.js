@@ -199,11 +199,6 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         return this.inputDataType("refreshRecordId", null);
     }
 
-    /** Nothing to target if the refresh itself is off. */
-    get refreshOptionsDisabled() {
-        return !this.refreshOnTimeout;
-    }
-
     get timeoutAction() {
         return this.resolve("timeoutAction");
     }
@@ -292,28 +287,6 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         ];
     }
 
-    /**
-     * Positive forms for the kit's value inputs.
-     *
-     * `c-flow-config-value-input` exposes no `disabled` API, so passing one is
-     * silently ignored -- and LWC still sets the property, which makes a test
-     * asserting `.disabled` pass against a control that never greys out. These
-     * gate `lwc:if` instead, so an inapplicable input is simply not rendered.
-     * Any value already saved is untouched and returns with the control.
-     */
-    get timerOptionsEnabled() {
-        return !this.timerOptionsDisabled;
-    }
-
-    get warningOptionsEnabled() {
-        return !this.warningOptionsDisabled;
-    }
-
-    /** The bar tint does nothing unless there is a bar to tint. */
-    get progressTintDisabled() {
-        return this.warningOptionsDisabled || !this.showProgressBar;
-    }
-
     get warningStyleOptions() {
         return [
             { label: "No Change", value: "None" },
@@ -324,9 +297,17 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         ];
     }
 
-    /** Nothing in the warning group does anything until a threshold is set. */
-    get warningOptionsDisabled() {
-        return this.warningTotalSeconds <= 0;
+    /**
+     * The warning controls are deliberately NOT gated on a threshold.
+     *
+     * They do nothing without one, which is harmless, and greying them would
+     * have to be inconsistent: the kit's value input cannot be disabled, so
+     * Warning Message would stay live while its neighbours greyed out. Leaving
+     * all of them available is the only uniform option that does not involve
+     * swapping controls in and out as the admin types.
+     */
+    get warningTotalSecondsSet() {
+        return this.warningTotalSeconds > 0;
     }
 
     /** Held as a `{!Reference}`, which is the form the resource picker expects. */

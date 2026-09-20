@@ -234,7 +234,7 @@ describe("display options", () => {
         await Promise.resolve();
 
         const input = control(element, "timerLabel");
-        expect(input.tagName.toLowerCase()).toBe("c-flow-auto-navigate-value-input");
+        expect(input.tagName.toLowerCase()).toBe("c-flow-config-value-input");
         expect(input.valueType).toBe("String");
     });
 });
@@ -335,25 +335,6 @@ describe("warning threshold entry", () => {
         });
 
         expect(warningSummaryText(element)).toBe("Warns 1 minute 30 seconds before advancing.");
-    });
-
-    it("keeps the warning options disabled until a threshold is set", async () => {
-        const element = build();
-        expect(control(element, "warningStyle").disabled).toBe(true);
-
-        typeDuration(element, "warningMinutes", "2");
-        await Promise.resolve();
-
-        expect(control(element, "warningStyle").disabled).toBe(false);
-    });
-
-    it("enables the options from any one of the three boxes", async () => {
-        const element = build();
-
-        typeDuration(element, "warningHours", "1");
-        await Promise.resolve();
-
-        expect(control(element, "warningShowIcon").disabled).toBe(false);
     });
 
     it("rejects a warning at or above the total duration", () => {
@@ -549,60 +530,42 @@ describe("panel organization", () => {
 
 describe("dependent controls", () => {
     /**
-     * These three use the local overlay rather than the kit's value input,
-     * which has no `disabled` API. The overlay consumes the property, so
-     * reading it back here is meaningful; that the greying is real is proved
-     * in the overlay's own tests.
+     * Only the lightning-* controls grey out. The kit's value input has no
+     * `disabled` API, so Message to Users, Warning Message and Record to
+     * Refresh stay live -- they simply have no effect without their parent,
+     * which is harmless. An overlay that swapped the picker for a disabled
+     * stand-in was tried and reverted: the control visibly changed shape.
      */
-    it.each(["timerLabel", "warningLabel", "refreshRecordId"])("greys out %s until its parent is set", (property) => {
-        expect(control(build(), property).disabled).toBe(true);
-    });
+    it.each(["timerDirection", "timeFormat", "showReset", "messagePosition"])(
+        "greys out %s without a visible timer",
+        (property) => {
+            expect(control(build(), property).disabled).toBe(true);
+        }
+    );
 
-    it("enables the message and its position once the timer is shown", async () => {
+    it("enables the timer options once the timer is shown", async () => {
         const element = build();
         toggle(element, "showTimer", true);
         await Promise.resolve();
 
-        expect(control(element, "timerLabel").disabled).toBe(false);
-        expect(control(element, "messagePosition").disabled).toBe(false);
-    });
-
-    it("enables the warning message once a threshold is set", async () => {
-        const element = build();
-        typeDuration(element, "warningSeconds", "10");
-        await Promise.resolve();
-
-        expect(control(element, "warningLabel").disabled).toBe(false);
-    });
-
-    it("enables the record target once refreshing is on", async () => {
-        const element = build();
-        toggle(element, "refreshOnTimeout", true);
-        await Promise.resolve();
-
-        expect(control(element, "refreshRecordId").disabled).toBe(false);
-    });
-
-    it("still shows a saved value while the control is greyed", () => {
-        const element = build({
-            inputVariables: [{ name: "warningLabel", value: "Advancing soon", valueDataType: "String" }]
+        ["timerDirection", "timeFormat", "showReset", "messagePosition"].forEach((property) => {
+            expect(control(element, property).disabled).toBe(false);
         });
-
-        const input = control(element, "warningLabel");
-        expect(input.disabled).toBe(true);
-        expect(input.value).toBe("Advancing soon");
     });
 
-    it("needs both a threshold and a bar before the tint is available", async () => {
-        const element = build({
-            inputVariables: [{ name: "warningSeconds", value: "5", valueDataType: "Number" }]
+    /** Deliberately ungated -- see the note above. */
+    it.each(["warningStyle", "warningShowIcon", "warningTintProgressBar"])(
+        "leaves %s available with no warning threshold set",
+        (property) => {
+            expect(control(build(), property).disabled).toBeFalsy();
+        }
+    );
+
+    it("renders the kit's value input directly, with no disabled stand-in", () => {
+        const element = build();
+        ["timerLabel", "warningLabel", "refreshRecordId"].forEach((property) => {
+            expect(control(element, property).tagName.toLowerCase()).toBe("c-flow-config-value-input");
         });
-        expect(control(element, "warningTintProgressBar").disabled).toBe(true);
-
-        toggle(element, "showProgressBar", true);
-        await Promise.resolve();
-
-        expect(control(element, "warningTintProgressBar").disabled).toBe(false);
     });
 });
 

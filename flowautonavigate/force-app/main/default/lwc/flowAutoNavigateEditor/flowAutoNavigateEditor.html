@@ -144,7 +144,7 @@
                          Detail on an LWR page does not participate in the
                          refresh tree and so ignores RefreshEvent. Notifying
                          LDS reaches its wire directly. -->
-                    <c-flow-auto-navigate-value-input
+                    <c-flow-config-value-input
                         data-validatable
                         data-property="refreshRecordId"
                         label="Record to Refresh"
@@ -157,8 +157,7 @@
                         automatic-output-variables={automaticOutputVariables}
                         api-version={apiVersion}
                         onvaluechange={handleValueChange}
-                        disabled={refreshOptionsDisabled}
-                    ></c-flow-auto-navigate-value-input>
+                    ></c-flow-config-value-input>
 
                     <lightning-input
                         type="checkbox"
@@ -218,7 +217,7 @@
                         onchange={handleCheckbox}
                     ></lightning-input>
 
-                    <c-flow-auto-navigate-value-input
+                    <c-flow-config-value-input
                         data-validatable
                         data-property="timerLabel"
                         label="Message to Users"
@@ -231,8 +230,7 @@
                         automatic-output-variables={automaticOutputVariables}
                         api-version={apiVersion}
                         onvaluechange={handleValueChange}
-                        disabled={timerOptionsDisabled}
-                    ></c-flow-auto-navigate-value-input>
+                    ></c-flow-config-value-input>
 
                     <lightning-combobox
                         data-validatable
@@ -332,12 +330,11 @@
                         label="Warning Style"
                         value={warningStyle}
                         options={warningStyleOptions}
-                        disabled={warningOptionsDisabled}
                         field-level-help="How the timer itself changes. Color on its own carries the change by color alone, which fails WCAG 1.4.1 unless you also set a warning message or the icon."
                         onchange={handleSelect}
                     ></lightning-combobox>
 
-                    <c-flow-auto-navigate-value-input
+                    <c-flow-config-value-input
                         data-validatable
                         data-property="warningLabel"
                         label="Warning Message"
@@ -350,8 +347,7 @@
                         automatic-output-variables={automaticOutputVariables}
                         api-version={apiVersion}
                         onvaluechange={handleValueChange}
-                        disabled={warningOptionsDisabled}
-                    ></c-flow-auto-navigate-value-input>
+                    ></c-flow-config-value-input>
 
                     <lightning-input
                         type="checkbox"
@@ -360,7 +356,6 @@
                         label="Show Warning Icon"
                         field-level-help="Adds a warning icon beside the timer during the warning phase."
                         checked={warningShowIcon}
-                        disabled={warningOptionsDisabled}
                         onchange={handleCheckbox}
                     ></lightning-input>
 
@@ -372,7 +367,6 @@
                         label="Tint Progress Bar When Warning"
                         field-level-help="Turns the progress bar red during the warning phase. Needs Show Progress Bar."
                         checked={warningTintProgressBar}
-                        disabled={progressTintDisabled}
                         onchange={handleCheckbox}
                     ></lightning-input>
                 </div>
