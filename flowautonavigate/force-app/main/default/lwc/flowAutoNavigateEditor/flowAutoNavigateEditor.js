@@ -37,7 +37,9 @@ const DISPLAY_DEFAULTS = {
     warningTintProgressBar: false,
     warningStyle: "Color and Weight",
     timerDirection: DIRECTION_DOWN,
-    timeoutAction: "Next"
+    timeoutAction: "Next",
+    timeFormat: "Standard",
+    messagePosition: "Below"
 };
 
 /**
@@ -85,6 +87,12 @@ function humanizeSeconds(totalSeconds) {
 }
 
 export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
+    /**
+     * Open on load. Only the duration is needed for a working configuration,
+     * so the rest start collapsed rather than making the panel a long scroll.
+     */
+    initialSections = ["when"];
+
     /**
      * Optimistic values, keyed by property.
      *
@@ -258,6 +266,35 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
 
     get warningTintProgressBar() {
         return Boolean(this.resolve("warningTintProgressBar"));
+    }
+
+    get timeFormat() {
+        return this.resolve("timeFormat");
+    }
+
+    /** Examples in the labels: a format is far easier to recognise than read. */
+    get timeFormatOptions() {
+        return [
+            { label: "Standard (0:40)", value: "Standard" },
+            { label: "Always Two Digits (00:00:40)", value: "Fixed" },
+            { label: "Compact (40)", value: "Compact" }
+        ];
+    }
+
+    get messagePosition() {
+        return this.resolve("messagePosition");
+    }
+
+    get messagePositionOptions() {
+        return [
+            { label: "Below the Timer", value: "Below" },
+            { label: "Above the Timer", value: "Above" }
+        ];
+    }
+
+    /** The bar tint does nothing unless there is a bar to tint. */
+    get progressTintDisabled() {
+        return this.warningOptionsDisabled || !this.showProgressBar;
     }
 
     get warningStyleOptions() {

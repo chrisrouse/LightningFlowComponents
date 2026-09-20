@@ -17,6 +17,13 @@
     <template lwc:if={hasVisibleContent}>
         <div class={contentClass}>
             <template lwc:if={showTimer}>
+                <template lwc:if={messageAbove}>
+                    <lightning-formatted-rich-text
+                        class="slds-align_absolute-center"
+                        value={displayLabel}
+                    ></lightning-formatted-rich-text>
+                </template>
+
                 <!-- role="timer" carries an implicit aria-live="off", which is
                      what we want: a value that changes every second announced
                      politely would talk over everything else a screen reader is
@@ -35,7 +42,7 @@
                     <span>{timeDisplay}</span>
                 </div>
 
-                <template lwc:if={displayLabel}>
+                <template lwc:if={messageBelow}>
                     <lightning-formatted-rich-text
                         class="slds-align_absolute-center"
                         value={displayLabel}

@@ -39,6 +39,25 @@ const SECONDS_PER_DAY = 86400;
 
 export const DIRECTION = { DOWN: "Down", UP: "Up" };
 
+/**
+ * How much of the clock is shown.
+ *
+ * `Standard` is the original behavior and stays the default, so no configured
+ * screen changes appearance. The other two are the extremes an admin might
+ * want: a fixed-width clock that never reflows, or the shortest thing that
+ * still reads as a time.
+ */
+export const TIME_FORMAT = {
+    /** 00:00:40 -- every unit, always two digits. */
+    FIXED: "Fixed",
+    /** 0:40 -- hours drop when empty, minutes always shown. */
+    STANDARD: "Standard",
+    /** 40 -- every empty leading unit drops, including minutes. */
+    COMPACT: "Compact"
+};
+
+export const MESSAGE_POSITION = { ABOVE: "Above", BELOW: "Below" };
+
 export const TIMEOUT_ACTION = {
     NEXT: "Next",
     BACK: "Back",
@@ -145,32 +164,41 @@ function sumMs(days, hours, minutes, seconds) {
 }
 
 /**
- * `2d 05:00:00`, `H:MM:SS`, or `M:SS` -- the largest unit present wins.
+ * The countdown as text, in the requested format.
  *
- * The `d` suffix rather than a fourth colon segment: `3:00:00:00` and
- * `3:00:00` differ only by how many segments you count, which is easy to
- * misread on a glanceable timer.
+ * `2d 05:00:00` for a day or more -- the `d` suffix rather than a fourth
+ * colon segment, because `3:00:00:00` and `3:00:00` differ only by how many
+ * segments you count, which is easy to misread on a glanceable timer.
  *
  * A countdown rounds up so the configured value is visible on the first paint
- * and "0:01" stays up for its full second; elapsed time rounds down so it starts
- * at "0:00".
+ * and "0:01" stays up for its full second; elapsed time rounds down so it
+ * starts at "0:00".
  */
-function formatDuration(milliseconds, roundUp) {
+function formatDuration(milliseconds, roundUp, format) {
     const totalSeconds = roundUp ? Math.ceil(milliseconds / 1000) : Math.floor(milliseconds / 1000);
     const days = Math.floor(totalSeconds / SECONDS_PER_DAY);
     const hours = Math.floor((totalSeconds % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
     const minutes = Math.floor((totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
     const seconds = totalSeconds % SECONDS_PER_MINUTE;
-    const paddedSeconds = String(seconds).padStart(2, "0");
-    const paddedMinutes = String(minutes).padStart(2, "0");
 
+    const pad = (value) => String(value).padStart(2, "0");
+    const fixed = format === TIME_FORMAT.FIXED;
+
+    // Once days are shown the clock is full width regardless, so hours are
+    // padded in every format -- `2d 5:00:00` reads as a mistake.
     if (days > 0) {
-        return `${days}d ${String(hours).padStart(2, "0")}:${paddedMinutes}:${paddedSeconds}`;
+        return `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    }
+    if (fixed) {
+        return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     }
     if (hours > 0) {
-        return `${hours}:${paddedMinutes}:${paddedSeconds}`;
+        return `${hours}:${pad(minutes)}:${pad(seconds)}`;
     }
-    return `${minutes}:${paddedSeconds}`;
+    if (format === TIME_FORMAT.COMPACT && minutes === 0) {
+        return `${seconds}`;
+    }
+    return `${minutes}:${pad(seconds)}`;
 }
 
 export default class FlowAutoNavigate extends LightningElement {
@@ -233,6 +261,8 @@ export default class FlowAutoNavigate extends LightningElement {
     @api refreshRecordId;
     @api timerLabel;
     @api timerDirection = DIRECTION.DOWN;
+    @api timeFormat = TIME_FORMAT.STANDARD;
+    @api messagePosition = MESSAGE_POSITION.BELOW;
 
     /** Time-running-out treatment. Inert while the threshold sums to zero.
      *  Entered as Days / Hours / Minutes / Seconds, like the total duration. */
@@ -484,7 +514,7 @@ export default class FlowAutoNavigate extends LightningElement {
         }
 
         const shown = this.isCountdown ? remaining : this._durationMs - remaining;
-        const nextText = formatDuration(shown, this.isCountdown);
+        const nextText = formatDuration(shown, this.isCountdown, this.timeFormat);
         if (nextText !== this.timeDisplay) {
             this.timeDisplay = nextText;
         }
@@ -676,6 +706,14 @@ export default class FlowAutoNavigate extends LightningElement {
     /** The warning wording replaces the usual message, if one was given. */
     get displayLabel() {
         return this.warningActive && this.warningLabel ? this.warningLabel : this.timerLabel;
+    }
+
+    get messageAbove() {
+        return Boolean(this.displayLabel) && this.messagePosition === MESSAGE_POSITION.ABOVE;
+    }
+
+    get messageBelow() {
+        return Boolean(this.displayLabel) && this.messagePosition !== MESSAGE_POSITION.ABOVE;
     }
 
     get showWarningIcon() {

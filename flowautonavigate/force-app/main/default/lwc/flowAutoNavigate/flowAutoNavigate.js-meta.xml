@@ -25,6 +25,8 @@
 
             <property name="showTimer" type="Boolean" label="Show Timer" role="inputOnly" />
             <property name="timerDirection" type="String" label="Timer Direction" role="inputOnly" />
+            <property name="timeFormat" type="String" label="Time Format" role="inputOnly" />
+            <property name="messagePosition" type="String" label="Message Position" role="inputOnly" />
             <property name="showReset" type="Boolean" label="Show Timer Reset" role="inputOnly" />
             <property name="timerLabel" type="String" label="Message to Users" role="inputOnly" />
             <property name="showProgressBar" type="Boolean" label="Show Progress Bar" role="inputOnly" />

@@ -1257,3 +1257,141 @@ describe("durations of a day or more", () => {
         expect(types(events)).toContain(NEXT);
     });
 });
+
+describe("time format", () => {
+    function render(config) {
+        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        element.timeoutHours = config.hours;
+        element.timeoutMinutes = config.minutes;
+        element.timeoutSeconds = config.seconds;
+        element.timeoutDays = config.days;
+        element.timeFormat = config.timeFormat;
+        element.showTimer = true;
+        element.availableActions = ["NEXT"];
+        document.body.appendChild(element);
+        return element;
+    }
+
+    function text(element) {
+        return element.shadowRoot.querySelector(".auto-navigate__timer").textContent;
+    }
+
+    /** The default is the original behavior, so no existing screen shifts. */
+    it.each([
+        [{ seconds: 40 }, "0:40"],
+        [{ minutes: 5, seconds: 45 }, "5:45"],
+        [{ minutes: 30, seconds: 45 }, "30:45"],
+        [{ hours: 9, minutes: 45, seconds: 40 }, "9:45:40"]
+    ])("Standard renders %j as %s", async (config, expected) => {
+        const element = render(config);
+        await Promise.resolve();
+        expect(text(element)).toBe(expected);
+    });
+
+    it.each([
+        [{ seconds: 40 }, "00:00:40"],
+        [{ minutes: 5, seconds: 45 }, "00:05:45"],
+        [{ minutes: 30, seconds: 45 }, "00:30:45"],
+        [{ hours: 9, minutes: 45, seconds: 40 }, "09:45:40"],
+        [{ hours: 12, minutes: 45, seconds: 30 }, "12:45:30"]
+    ])("Fixed renders %j as %s", async (config, expected) => {
+        const element = render({ ...config, timeFormat: "Fixed" });
+        await Promise.resolve();
+        expect(text(element)).toBe(expected);
+    });
+
+    it.each([
+        [{ seconds: 40 }, "40"],
+        [{ minutes: 5, seconds: 45 }, "5:45"],
+        [{ minutes: 30, seconds: 45 }, "30:45"],
+        [{ hours: 9, minutes: 45, seconds: 40 }, "9:45:40"],
+        [{ hours: 12, minutes: 45, seconds: 30 }, "12:45:30"]
+    ])("Compact renders %j as %s", async (config, expected) => {
+        const element = render({ ...config, timeFormat: "Compact" });
+        await Promise.resolve();
+        expect(text(element)).toBe(expected);
+    });
+
+    it("keeps Fixed at a constant width as the clock shrinks", async () => {
+        const element = render({ minutes: 1, seconds: 1, timeFormat: "Fixed" });
+        await Promise.resolve();
+        const widths = new Set([text(element).length]);
+
+        elapse(30_000);
+        await Promise.resolve();
+        widths.add(text(element).length);
+
+        elapse(30_000);
+        await Promise.resolve();
+        widths.add(text(element).length);
+
+        expect([...widths]).toEqual([8]);
+    });
+
+    it("lets Compact collapse to bare seconds as it shrinks", async () => {
+        const element = render({ minutes: 1, seconds: 5, timeFormat: "Compact" });
+        await Promise.resolve();
+        expect(text(element)).toBe("1:05");
+
+        elapse(25_000);
+        await Promise.resolve();
+        expect(text(element)).toBe("40");
+    });
+
+    /** Days always pad the hours: `2d 5:00:00` reads as a mistake. */
+    it.each(["Standard", "Fixed", "Compact"])("pads the hours after a day in %s", async (timeFormat) => {
+        const element = render({ days: 2, hours: 5, timeFormat });
+        await Promise.resolve();
+        expect(text(element)).toBe("2d 05:00:00");
+    });
+});
+
+describe("message position", () => {
+    function build2(rest) {
+        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        element.timeoutSeconds = 30;
+        element.showTimer = true;
+        element.timerLabel = "please wait";
+        element.availableActions = ["NEXT"];
+        Object.assign(element, rest);
+        document.body.appendChild(element);
+        return element;
+    }
+
+    /** Reads the rendered order of the timer and the message. */
+    function order(element) {
+        return [...element.shadowRoot.querySelectorAll(".auto-navigate__timer, lightning-formatted-rich-text")].map(
+            (node) => (node.classList.contains("auto-navigate__timer") ? "timer" : "message")
+        );
+    }
+
+    it("puts the message below the timer by default", async () => {
+        const element = build2({});
+        await Promise.resolve();
+        expect(order(element)).toEqual(["timer", "message"]);
+    });
+
+    it("puts the message above the timer when asked", async () => {
+        const element = build2({ messagePosition: "Above" });
+        await Promise.resolve();
+        expect(order(element)).toEqual(["message", "timer"]);
+    });
+
+    it("renders the message once, not in both slots", async () => {
+        const element = build2({ messagePosition: "Above" });
+        await Promise.resolve();
+        expect(element.shadowRoot.querySelectorAll("lightning-formatted-rich-text")).toHaveLength(1);
+    });
+
+    it("positions the warning message the same way", async () => {
+        const element = build2({
+            messagePosition: "Above",
+            warningSeconds: 30,
+            warningLabel: "Advancing soon"
+        });
+        await Promise.resolve();
+
+        expect(order(element)).toEqual(["message", "timer"]);
+        expect(element.shadowRoot.querySelector("lightning-formatted-rich-text").value).toBe("Advancing soon");
+    });
+});

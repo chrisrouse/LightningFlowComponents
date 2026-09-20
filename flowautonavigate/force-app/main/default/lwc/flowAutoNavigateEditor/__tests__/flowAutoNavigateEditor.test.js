@@ -501,3 +501,120 @@ describe("day entry", () => {
         ]);
     });
 });
+
+describe("panel organization", () => {
+    function sections(element) {
+        return [...element.shadowRoot.querySelectorAll("lightning-accordion-section")].map((s) => s.label);
+    }
+
+    it("groups the panel by the question being answered", () => {
+        expect(sections(build())).toEqual([
+            "When to Advance",
+            "What Happens Then",
+            "While Waiting",
+            "Time Running Out"
+        ]);
+    });
+
+    it("opens only the section needed for a working configuration", () => {
+        expect(build().shadowRoot.querySelector("lightning-accordion").activeSectionName).toEqual(["when"]);
+    });
+
+    /** Timing questions belong together; these used to sit below the refresh. */
+    it("keeps the trigger and pause with the duration", () => {
+        const element = build();
+        const when = element.shadowRoot.querySelector(
+            "lightning-accordion-section[data-x], lightning-accordion-section"
+        );
+        expect(when.label).toBe("When to Advance");
+        ["timeoutDays", "timeoutSeconds", "advanceWhen", "paused"].forEach((property) => {
+            expect(when.querySelector(`[data-property="${property}"]`)).not.toBeNull();
+        });
+    });
+
+    it("files hide-on-expiry with the other expiry behaviors", () => {
+        const then = [...build().shadowRoot.querySelectorAll("lightning-accordion-section")][1];
+        ["timeoutAction", "refreshOnTimeout", "refreshRecordId", "hideOnExpiry"].forEach((property) => {
+            expect(then.querySelector(`[data-property="${property}"]`)).not.toBeNull();
+        });
+    });
+});
+
+describe("dependent controls grey out", () => {
+    /** Both of these had no effect without their parent, but stayed enabled. */
+    it("disables the message and its position without a visible timer", async () => {
+        const element = build();
+        expect(control(element, "timerLabel").disabled).toBe(true);
+        expect(control(element, "messagePosition").disabled).toBe(true);
+
+        toggle(element, "showTimer", true);
+        await Promise.resolve();
+
+        expect(control(element, "timerLabel").disabled).toBe(false);
+        expect(control(element, "messagePosition").disabled).toBe(false);
+    });
+
+    it("disables the time format without a visible timer", async () => {
+        const element = build();
+        expect(control(element, "timeFormat").disabled).toBe(true);
+
+        toggle(element, "showTimer", true);
+        await Promise.resolve();
+
+        expect(control(element, "timeFormat").disabled).toBe(false);
+    });
+
+    it("needs both a threshold and a bar before the tint is available", async () => {
+        const element = build({
+            inputVariables: [{ name: "warningSeconds", value: "5", valueDataType: "Number" }]
+        });
+        // threshold set, but no bar to tint
+        expect(control(element, "warningTintProgressBar").disabled).toBe(true);
+
+        toggle(element, "showProgressBar", true);
+        await Promise.resolve();
+
+        expect(control(element, "warningTintProgressBar").disabled).toBe(false);
+    });
+});
+
+describe("new timer options", () => {
+    it("offers the three time formats with examples in the labels", () => {
+        const options = control(build(), "timeFormat").options;
+        expect(options.map((o) => o.value)).toEqual(["Standard", "Fixed", "Compact"]);
+        expect(options.map((o) => o.label)).toEqual([
+            "Standard (0:40)",
+            "Always Two Digits (00:00:40)",
+            "Compact (40)"
+        ]);
+    });
+
+    it("defaults the format and position without writing them", () => {
+        const element = build();
+        const details = captureInputs(element);
+
+        expect(control(element, "timeFormat").value).toBe("Standard");
+        expect(control(element, "messagePosition").value).toBe("Below");
+        expect(details).toEqual([]);
+    });
+
+    it("publishes a chosen format", async () => {
+        const element = build();
+        const details = captureInputs(element);
+
+        control(element, "timeFormat").dispatchEvent(new CustomEvent("change", { detail: { value: "Compact" } }));
+        await Promise.resolve();
+
+        expect(details).toEqual([{ name: "timeFormat", newValue: "Compact", newValueDataType: "String" }]);
+    });
+
+    it("publishes a chosen message position", async () => {
+        const element = build();
+        const details = captureInputs(element);
+
+        control(element, "messagePosition").dispatchEvent(new CustomEvent("change", { detail: { value: "Above" } }));
+        await Promise.resolve();
+
+        expect(details).toEqual([{ name: "messagePosition", newValue: "Above", newValueDataType: "String" }]);
+    });
+});

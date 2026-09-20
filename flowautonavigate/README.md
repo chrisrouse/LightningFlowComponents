@@ -70,16 +70,18 @@ starts as it changes, keeping the time already served rather than restarting.
 
 ### Display
 
-| Property                | Type    | Notes                                                         |
-| ----------------------- | ------- | ------------------------------------------------------------- |
-| Show Timer              | Boolean | Off by default; the component advances silently.              |
-| Timer Direction         | String  | `Down` (default) or `Up`. Needs Show Timer.                   |
-| Show Timer Reset        | Boolean | Offers a Reset button. Needs Show Timer. See Accessibility.   |
-| Message to Users        | String  | Rich text below the timer. Accepts a Flow resource.           |
-| Show Progress Bar       | Boolean | Depletes counting down, fills counting up.                    |
-| Show Loader             | Boolean | A spinner. Suggests loading; prefer the progress bar.         |
-| Hide When Time Runs Out | Boolean | Hides the component on expiry but keeps its space. See below. |
-| Refresh the Page        | Boolean | Refreshes the surrounding page on expiry. See below.          |
+| Property                | Type    | Notes                                                                       |
+| ----------------------- | ------- | --------------------------------------------------------------------------- |
+| Show Timer              | Boolean | Off by default; the component advances silently.                            |
+| Timer Direction         | String  | `Down` (default) or `Up`. Needs Show Timer.                                 |
+| Time Format             | String  | `Standard` (`0:40`), `Fixed` (`00:00:40`), `Compact` (`40`).                |
+| Message Position        | String  | `Below` (default) or `Above` the timer. Applies to the warning message too. |
+| Show Timer Reset        | Boolean | Offers a Reset button. Needs Show Timer. See Accessibility.                 |
+| Message to Users        | String  | Rich text below the timer. Accepts a Flow resource.                         |
+| Show Progress Bar       | Boolean | Depletes counting down, fills counting up.                                  |
+| Show Loader             | Boolean | A spinner. Suggests loading; prefer the progress bar.                       |
+| Hide When Time Runs Out | Boolean | Hides the component on expiry but keeps its space. See below.               |
+| Refresh the Page        | Boolean | Refreshes the surrounding page on expiry. See below.                        |
 
 ### Time running out
 
@@ -223,10 +225,14 @@ Experience, with `Refresh the Page` alone.
   interval and advance on it.
 - **The screen advances once**, and the timer display updates once a second even
   though the deadline is checked four times a second.
-- **The display shows days as `2d 05:00:00`** once a duration reaches a day,
-  and is unchanged below that (`23:59:00`, `1:30:00`, `1:05`). The `d` suffix
-  rather than a fourth colon segment, because `3:00:00:00` and `3:00:00`
-  differ only by segment count and are easy to misread at a glance.
+- **The display shows days as `2d 05:00:00`** once a duration reaches a day, in
+  every format. The `d` suffix rather than a fourth colon segment, because
+  `3:00:00:00` and `3:00:00` differ only by segment count and are easy to
+  misread at a glance.
+- **Time Format** controls how much of the clock below a day is shown:
+  `Standard` drops empty hours but keeps minutes (`0:40`), `Fixed` always shows
+  every unit at two digits so the line never changes width (`00:00:40`), and
+  `Compact` drops every empty leading unit including minutes (`40`).
 - **A multi-day timer only completes where the session outlives it.** A
   logged-in Lightning session will not, so days are really for an always-on
   public Experience Cloud page — a kiosk or lobby display. There is no upper
