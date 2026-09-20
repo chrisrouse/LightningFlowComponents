@@ -228,9 +228,12 @@ describe("display options", () => {
         expect(details).toEqual([{ name: "showProgressBar", newValue: true, newValueDataType: "Boolean" }]);
     });
 
-    it("offers the message as a literal or a Flow resource", () => {
-        const input = control(build(), "timerLabel");
+    it("offers the message as a literal or a Flow resource", async () => {
+        const element = build();
+        toggle(element, "showTimer", true);
+        await Promise.resolve();
 
+        const input = control(element, "timerLabel");
         expect(input.tagName.toLowerCase()).toBe("c-flow-config-value-input");
         expect(input.valueType).toBe("String");
     });
@@ -532,26 +535,65 @@ describe("panel organization", () => {
         });
     });
 
-    it("files hide-on-expiry with the other expiry behaviors", () => {
-        const then = [...build().shadowRoot.querySelectorAll("lightning-accordion-section")][1];
+    it("files hide-on-expiry with the other expiry behaviors", async () => {
+        const element = build();
+        toggle(element, "refreshOnTimeout", true);
+        await Promise.resolve();
+
+        const then = [...element.shadowRoot.querySelectorAll("lightning-accordion-section")][1];
         ["timeoutAction", "refreshOnTimeout", "refreshRecordId", "hideOnExpiry"].forEach((property) => {
             expect(then.querySelector(`[data-property="${property}"]`)).not.toBeNull();
         });
     });
 });
 
-describe("dependent controls grey out", () => {
-    /** Both of these had no effect without their parent, but stayed enabled. */
-    it("disables the message and its position without a visible timer", async () => {
-        const element = build();
-        expect(control(element, "timerLabel").disabled).toBe(true);
-        expect(control(element, "messagePosition").disabled).toBe(true);
+describe("dependent controls", () => {
+    /**
+     * The kit's value input has no `disabled` API, so passing one is silently
+     * ignored -- and LWC still sets the property, which made an earlier
+     * `.disabled` assertion pass against a control that never greyed out.
+     * These are gated with `lwc:if`, so absence is the observable behavior.
+     */
+    it.each([
+        ["timerLabel", "showTimer"],
+        ["warningLabel", "warningSeconds"],
+        ["refreshRecordId", "refreshOnTimeout"]
+    ])("does not render %s until %s is set", (property) => {
+        expect(control(build(), property)).toBeNull();
+    });
 
+    it("brings the message back once the timer is shown", async () => {
+        const element = build();
         toggle(element, "showTimer", true);
         await Promise.resolve();
 
-        expect(control(element, "timerLabel").disabled).toBe(false);
+        expect(control(element, "timerLabel")).not.toBeNull();
         expect(control(element, "messagePosition").disabled).toBe(false);
+    });
+
+    it("brings the warning message back once a threshold is set", async () => {
+        const element = build();
+        expect(control(element, "warningLabel")).toBeNull();
+
+        typeDuration(element, "warningSeconds", "10");
+        await Promise.resolve();
+
+        expect(control(element, "warningLabel")).not.toBeNull();
+    });
+
+    it("keeps a saved message even while it is not rendered", () => {
+        const element = build({
+            inputVariables: [{ name: "warningLabel", value: "Advancing soon", valueDataType: "String" }]
+        });
+
+        expect(control(element, "warningLabel")).toBeNull();
+        // Still committed -- hiding the control does not clear the property.
+        expect(element.validate()).not.toContainEqual(expect.objectContaining({ key: "warningLabel" }));
+    });
+
+    it("greys out the position picker without a visible timer", () => {
+        // lightning-combobox does support `disabled`, so this one really greys.
+        expect(control(build(), "messagePosition").disabled).toBe(true);
     });
 
     it("disables the time format without a visible timer", async () => {

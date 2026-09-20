@@ -292,6 +292,23 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         ];
     }
 
+    /**
+     * Positive forms for the kit's value inputs.
+     *
+     * `c-flow-config-value-input` exposes no `disabled` API, so passing one is
+     * silently ignored -- and LWC still sets the property, which makes a test
+     * asserting `.disabled` pass against a control that never greys out. These
+     * gate `lwc:if` instead, so an inapplicable input is simply not rendered.
+     * Any value already saved is untouched and returns with the control.
+     */
+    get timerOptionsEnabled() {
+        return !this.timerOptionsDisabled;
+    }
+
+    get warningOptionsEnabled() {
+        return !this.warningOptionsDisabled;
+    }
+
     /** The bar tint does nothing unless there is a bar to tint. */
     get progressTintDisabled() {
         return this.warningOptionsDisabled || !this.showProgressBar;
