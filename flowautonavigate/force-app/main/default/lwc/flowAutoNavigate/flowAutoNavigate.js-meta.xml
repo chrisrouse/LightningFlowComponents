@@ -12,6 +12,7 @@
              whatever a custom property editor writes, which no editor-side code
              can survive. Defaults live in the component and the editor instead. -->
         <targetConfig targets="lightning__FlowScreen" configurationEditor="c-flow-auto-navigate-editor">
+            <property name="timeoutDays" type="Integer" label="Days" role="inputOnly" />
             <property name="timeoutHours" type="Integer" label="Hours" role="inputOnly" />
             <property name="timeoutMinutes" type="Integer" label="Minutes" role="inputOnly" />
             <property name="timeoutSeconds" type="Integer" label="Seconds" role="inputOnly" />
@@ -34,6 +35,7 @@
 
             <!-- Time running out. Summed the same way as the duration above,
                  so a warning can be minutes rather than seconds long. -->
+            <property name="warningDays" type="Integer" label="Warning Days" role="inputOnly" />
             <property name="warningHours" type="Integer" label="Warning Hours" role="inputOnly" />
             <property name="warningMinutes" type="Integer" label="Warning Minutes" role="inputOnly" />
             <property name="warningSeconds" type="Integer" label="Warning Seconds" role="inputOnly" />

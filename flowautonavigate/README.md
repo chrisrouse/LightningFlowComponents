@@ -7,8 +7,8 @@ that should not wait on a click forever.
 ## Upgrading — breaking change
 
 The old `maxTime` property (an `H:M:S:MS` string) **has been removed**. Duration
-is now entered as three separate whole-number properties, summed:
-`timeoutHours`, `timeoutMinutes`, `timeoutSeconds` (all Integer).
+is now entered as four separate whole-number properties, summed:
+`timeoutDays`, `timeoutHours`, `timeoutMinutes`, `timeoutSeconds` (all Integer).
 
 **A flow configured with the old property will not auto-advance after upgrade.**
 It does not fail or navigate unexpectedly — the component simply stays inert and
@@ -19,7 +19,7 @@ duration.
 
 Properties are edited through a custom property editor
 (`c-flow-auto-navigate-editor`) rather than Flow Builder's default panel: the
-duration is three boxes on one row with a live plain-English summary
+duration is four boxes on one row with a live plain-English summary
 ("Advances after 1 minute 5 seconds."), and the panel refuses to save a duration
 of zero.
 
@@ -27,10 +27,11 @@ of zero.
 
 | Property                  | Type    | Notes                                                             |
 | ------------------------- | ------- | ----------------------------------------------------------------- |
-| Hours                     | Integer | Summed with the two below. Leave blank for none.                  |
+| Days                      | Integer | Summed with the three below. Leave blank for none.                |
+| Hours                     | Integer |                                                                   |
 | Minutes                   | Integer |                                                                   |
 | Seconds                   | Integer |                                                                   |
-| On Timeout                | String  | `Next` (default), `Back`, `Finish`, `Pause`, `Stay`. See below.   |
+| On Timeout                | String  | `Next` (default), `Back`, `Stay`. See below.                      |
 | Advance When This Is True | Boolean | Optional **resource**. Completes on a trigger instead of a timer. |
 | Pause Timer               | Boolean | Optional **resource**; the timer holds while true.                |
 
@@ -82,14 +83,15 @@ starts as it changes, keeping the time already served rather than restarting.
 
 ### Time running out
 
-The threshold uses the same three-box Hours / Minutes / Seconds control as
+The threshold uses the same four-box Days / Hours / Minutes / Seconds control as
 Advance After, summed the same way, so a long screen can warn minutes ahead
 rather than seconds. Everything else here is inert until it sums above zero,
 and it must be shorter than the total duration.
 
 | Property                       | Type    | Notes                                                             |
 | ------------------------------ | ------- | ----------------------------------------------------------------- |
-| Warning Hours                  | Integer | Summed with the two below. Blank for no warning phase.            |
+| Warning Days                   | Integer | Summed with the three below. Blank for no warning phase.          |
+| Warning Hours                  | Integer |                                                                   |
 | Warning Minutes                | Integer |                                                                   |
 | Warning Seconds                | Integer |                                                                   |
 | Warning Style                  | String  | `No Change`, `Color`, `Color and Weight`, `Pulse`, `Tinted Pill`. |
@@ -221,6 +223,15 @@ Experience, with `Refresh the Page` alone.
   interval and advance on it.
 - **The screen advances once**, and the timer display updates once a second even
   though the deadline is checked four times a second.
+- **The display shows days as `2d 05:00:00`** once a duration reaches a day,
+  and is unchanged below that (`23:59:00`, `1:30:00`, `1:05`). The `d` suffix
+  rather than a fourth colon segment, because `3:00:00:00` and `3:00:00`
+  differ only by segment count and are easy to misread at a glance.
+- **A multi-day timer only completes where the session outlives it.** A
+  logged-in Lightning session will not, so days are really for an always-on
+  public Experience Cloud page — a kiosk or lobby display. There is no upper
+  bound enforced, so a slipped digit in Days produces a screen that never
+  advances.
 
 ## Accessibility
 
@@ -242,25 +253,25 @@ Unit tests cover the logic; this table is about what has actually been run in
 Salesforce, because several of these depend on platform behavior that tests
 cannot prove.
 
-| Behavior                                                  | Status                                                              |
-| --------------------------------------------------------- | ------------------------------------------------------------------- |
-| Refresh in a console tab                                  | Verified                                                            |
-| Refresh on a non-console record page                      | Verified                                                            |
-| Refresh in Experience Cloud (LWR), with Record to Refresh | Verified                                                            |
-| Refresh in Experience Cloud without Record to Refresh     | Confirmed **not** to work                                           |
-| Pause Timer, bound to a reactive Boolean                  | Verified                                                            |
-| On Timeout: Next                                          | Verified                                                            |
-| On Timeout: Back                                          | Verified                                                            |
-| On Timeout: Stay, driving a Message from Timer Expired    | Verified                                                            |
-| Countdown display and progress bar                        | Verified                                                            |
-| Warning style: Tinted Pill                                | Verified                                                            |
-| On Timeout: Finish                                        | Not tested                                                          |
-| On Timeout: Pause the Flow                                | Not tested — needs a pausable flow, and does nothing if unavailable |
-| Advance When This Is True                                 | Not tested                                                          |
-| Hide When Time Runs Out                                   | Not tested                                                          |
-| Warning style: Pulse, and `prefers-reduced-motion`        | Not tested                                                          |
-| Milestone screen reader announcements                     | Not tested — never heard by a screen reader                         |
-| Salesforce mobile app                                     | Not tested                                                          |
+| Behavior                                                  | Status                                      |
+| --------------------------------------------------------- | ------------------------------------------- |
+| Refresh in a console tab                                  | Verified                                    |
+| Refresh on a non-console record page                      | Verified                                    |
+| Refresh in Experience Cloud (LWR), with Record to Refresh | Verified                                    |
+| Refresh in Experience Cloud without Record to Refresh     | Confirmed **not** to work                   |
+| Pause Timer, bound to a reactive Boolean                  | Verified                                    |
+| On Timeout: Next                                          | Verified                                    |
+| On Timeout: Back                                          | Verified                                    |
+| On Timeout: Next falling back to finish on a last screen  | Verified                                    |
+| On Timeout: Stay, driving a Message from Timer Expired    | Verified                                    |
+| Countdown display and progress bar                        | Verified                                    |
+| Warning style: Tinted Pill                                | Verified                                    |
+| Advance When This Is True                                 | Not tested                                  |
+| Hide When Time Runs Out                                   | Not tested                                  |
+| Warning style: Pulse, and `prefers-reduced-motion`        | Not tested                                  |
+| Milestone screen reader announcements                     | Not tested — never heard by a screen reader |
+| Durations of a day or more (`2d 05:00:00`)                | Not tested                                  |
+| Salesforce mobile app                                     | Not tested                                  |
 
 ## Development
 

@@ -5,7 +5,7 @@
  * `static flowProperties`, for the same reason `fgrid_flowGridEditor` does: the
  * declarative schema recognizes only String, Number, SObject and field, so it
  * has no Boolean control, and this panel is mostly checkboxes. It also needs the
- * three duration boxes on one row, which a flat form cannot express.
+ * four duration boxes on one row, which a flat form cannot express.
  *
  * Everything else still comes from the base class — the four Flow Builder
  * inputs, the input-changed event, and `validate()`. No kit code is forked.
@@ -49,12 +49,13 @@ const NUMBER_DATA_TYPE = "Number";
 
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
+const SECONDS_PER_DAY = 86400;
 
-const DURATION_PROPERTIES = ["timeoutHours", "timeoutMinutes", "timeoutSeconds"];
-const WARNING_PROPERTIES = ["warningHours", "warningMinutes", "warningSeconds"];
+const DURATION_PROPERTIES = ["timeoutDays", "timeoutHours", "timeoutMinutes", "timeoutSeconds"];
+const WARNING_PROPERTIES = ["warningDays", "warningHours", "warningMinutes", "warningSeconds"];
 
 /** Multiplier per box, in the order the property lists above declare them. */
-const UNIT_SECONDS = [SECONDS_PER_HOUR, SECONDS_PER_MINUTE, 1];
+const UNIT_SECONDS = [SECONDS_PER_DAY, SECONDS_PER_HOUR, SECONDS_PER_MINUTE, 1];
 
 function pluralize(count, noun) {
     return `${count} ${noun}${count === 1 ? "" : "s"}`;
@@ -62,11 +63,15 @@ function pluralize(count, noun) {
 
 /** "1 minute 5 seconds" — the summary an admin reads back to check their entry. */
 function humanizeSeconds(totalSeconds) {
-    const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
+    const days = Math.floor(totalSeconds / SECONDS_PER_DAY);
+    const hours = Math.floor((totalSeconds % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
     const minutes = Math.floor((totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
     const seconds = totalSeconds % SECONDS_PER_MINUTE;
 
     const parts = [];
+    if (days > 0) {
+        parts.push(pluralize(days, "day"));
+    }
     if (hours > 0) {
         parts.push(pluralize(hours, "hour"));
     }
@@ -138,6 +143,10 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
      * Controls
      * ------------------------------------------------------------------ */
 
+    get timeoutDays() {
+        return this.resolve("timeoutDays");
+    }
+
     get timeoutHours() {
         return this.resolve("timeoutHours");
     }
@@ -202,6 +211,10 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
     }
 
     /* ---- Time running out ---- */
+
+    get warningDays() {
+        return this.resolve("warningDays");
+    }
 
     get warningHours() {
         return this.resolve("warningHours");

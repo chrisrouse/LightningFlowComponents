@@ -9,8 +9,8 @@
  * timer could take many minutes of real time if the user switched tabs. With a
  * deadline, a throttled tab simply fires late and navigates on its next tick.
  *
- * The duration is entered as separate Hours / Minutes / Seconds properties and
- * summed, so there is no string format for an admin to get wrong. Those are
+ * The duration is entered as separate Days / Hours / Minutes / Seconds
+ * properties and summed, so there is no string format for an admin to get wrong. Those are
  * written by the custom property editor, `c-flow-auto-navigate-editor`.
  */
 import { LightningElement, api } from "lwc";
@@ -35,6 +35,7 @@ const TICK_MS = 250;
 
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
+const SECONDS_PER_DAY = 86400;
 
 export const DIRECTION = { DOWN: "Down", UP: "Up" };
 
@@ -97,11 +98,15 @@ function pluralize(count, noun) {
 
 /** "1 minute 5 seconds", for assistive text. */
 function humanizeSeconds(totalSeconds) {
-    const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
+    const days = Math.floor(totalSeconds / SECONDS_PER_DAY);
+    const hours = Math.floor((totalSeconds % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
     const minutes = Math.floor((totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
     const seconds = totalSeconds % SECONDS_PER_MINUTE;
 
     const parts = [];
+    if (days > 0) {
+        parts.push(pluralize(days, "day"));
+    }
     if (hours > 0) {
         parts.push(pluralize(hours, "hour"));
     }
@@ -124,19 +129,27 @@ function toCount(value) {
 }
 
 /**
- * Milliseconds from separate hour, minute and second boxes.
+ * Milliseconds from separate day, hour, minute and second boxes.
  *
  * Summed rather than treated as a clock reading, so 90 in the minutes box means
  * ninety minutes instead of being an error. Both the total duration and the
  * warning threshold are entered this way.
  */
-function sumMs(hours, minutes, seconds) {
-    const total = toCount(hours) * SECONDS_PER_HOUR + toCount(minutes) * SECONDS_PER_MINUTE + toCount(seconds);
+function sumMs(days, hours, minutes, seconds) {
+    const total =
+        toCount(days) * SECONDS_PER_DAY +
+        toCount(hours) * SECONDS_PER_HOUR +
+        toCount(minutes) * SECONDS_PER_MINUTE +
+        toCount(seconds);
     return total * 1000;
 }
 
 /**
- * `H:MM:SS`, or `M:SS` when under an hour.
+ * `2d 05:00:00`, `H:MM:SS`, or `M:SS` -- the largest unit present wins.
+ *
+ * The `d` suffix rather than a fourth colon segment: `3:00:00:00` and
+ * `3:00:00` differ only by how many segments you count, which is easy to
+ * misread on a glanceable timer.
  *
  * A countdown rounds up so the configured value is visible on the first paint
  * and "0:01" stays up for its full second; elapsed time rounds down so it starts
@@ -144,13 +157,18 @@ function sumMs(hours, minutes, seconds) {
  */
 function formatDuration(milliseconds, roundUp) {
     const totalSeconds = roundUp ? Math.ceil(milliseconds / 1000) : Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
+    const days = Math.floor(totalSeconds / SECONDS_PER_DAY);
+    const hours = Math.floor((totalSeconds % SECONDS_PER_DAY) / SECONDS_PER_HOUR);
     const minutes = Math.floor((totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
     const seconds = totalSeconds % SECONDS_PER_MINUTE;
     const paddedSeconds = String(seconds).padStart(2, "0");
+    const paddedMinutes = String(minutes).padStart(2, "0");
 
+    if (days > 0) {
+        return `${days}d ${String(hours).padStart(2, "0")}:${paddedMinutes}:${paddedSeconds}`;
+    }
     if (hours > 0) {
-        return `${hours}:${String(minutes).padStart(2, "0")}:${paddedSeconds}`;
+        return `${hours}:${paddedMinutes}:${paddedSeconds}`;
     }
     return `${minutes}:${paddedSeconds}`;
 }
@@ -159,6 +177,7 @@ export default class FlowAutoNavigate extends LightningElement {
     /** Supplied by Flow; tells us which navigation actions are possible. */
     @api availableActions = [];
 
+    @api timeoutDays;
     @api timeoutHours;
     @api timeoutMinutes;
     @api timeoutSeconds;
@@ -216,7 +235,8 @@ export default class FlowAutoNavigate extends LightningElement {
     @api timerDirection = DIRECTION.DOWN;
 
     /** Time-running-out treatment. Inert while the threshold sums to zero.
-     *  Entered as Hours / Minutes / Seconds, the same as the total duration. */
+     *  Entered as Days / Hours / Minutes / Seconds, like the total duration. */
+    @api warningDays;
     @api warningHours;
     @api warningMinutes;
     @api warningSeconds;
@@ -353,7 +373,7 @@ export default class FlowAutoNavigate extends LightningElement {
 
     /** Configured duration in milliseconds. Zero means "not configured". */
     get durationMs() {
-        return sumMs(this.timeoutHours, this.timeoutMinutes, this.timeoutSeconds);
+        return sumMs(this.timeoutDays, this.timeoutHours, this.timeoutMinutes, this.timeoutSeconds);
     }
 
     get isCountdown() {
@@ -439,7 +459,7 @@ export default class FlowAutoNavigate extends LightningElement {
 
     /** Milliseconds remaining at which the warning treatment switches on. */
     get warningMs() {
-        return sumMs(this.warningHours, this.warningMinutes, this.warningSeconds);
+        return sumMs(this.warningDays, this.warningHours, this.warningMinutes, this.warningSeconds);
     }
 
     /**

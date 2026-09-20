@@ -437,3 +437,67 @@ describe("advance trigger", () => {
         expect(details).toEqual([{ name: "advanceWhen", newValue: "{!fileUploaded}", newValueDataType: "reference" }]);
     });
 });
+
+describe("day entry", () => {
+    it("offers a Days box in both groups", () => {
+        const element = build();
+        expect(control(element, "timeoutDays")).not.toBeNull();
+        expect(control(element, "warningDays")).not.toBeNull();
+    });
+
+    it("orders the boxes largest unit first", () => {
+        const element = build();
+        const labels = [...element.shadowRoot.querySelectorAll('[data-property^="timeout"]')]
+            .filter((c) => c.type === "number")
+            .map((c) => c.label);
+        expect(labels).toEqual(["Days", "Hours", "Minutes", "Seconds"]);
+    });
+
+    it("includes days in the total", () => {
+        const element = build({
+            inputVariables: [
+                { name: "timeoutDays", value: "2", valueDataType: "Number" },
+                { name: "timeoutHours", value: "3", valueDataType: "Number" }
+            ]
+        });
+
+        expect(summaryText(element)).toBe("Advances after 2 days 3 hours.");
+    });
+
+    it("singularizes a single day", () => {
+        const element = build({
+            inputVariables: [{ name: "timeoutDays", value: "1", valueDataType: "Number" }]
+        });
+
+        expect(summaryText(element)).toBe("Advances after 1 day.");
+    });
+
+    it("accepts a warning measured in days", () => {
+        const element = build({
+            inputVariables: [
+                { name: "timeoutDays", value: "3", valueDataType: "Number" },
+                { name: "warningDays", value: "1", valueDataType: "Number" }
+            ]
+        });
+
+        expect(warningSummaryText(element)).toBe("Warns 1 day before advancing.");
+        expect(element.validate()).toEqual([]);
+    });
+
+    /** Cross-field rule still holds once days are in play. */
+    it("rejects a warning longer than a duration expressed in days", () => {
+        const element = build({
+            inputVariables: [
+                { name: "timeoutDays", value: "1", valueDataType: "Number" },
+                { name: "warningDays", value: "2", valueDataType: "Number" }
+            ]
+        });
+
+        expect(element.validate()).toEqual([
+            {
+                key: "warningSeconds",
+                errorString: "The warning must be shorter than the total duration of 1 day."
+            }
+        ]);
+    });
+});

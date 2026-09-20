@@ -15,7 +15,7 @@
             </div>
         </template>
 
-        <!-- Duration: three boxes on one row, so there is no format to get
+        <!-- Duration: four boxes on one row, so there is no format to get
              wrong. A plain number input rather than the kit's value input --
              only a literal makes sense here, and a bound Flow formula could not
              be summed for the live total below. -->
@@ -23,6 +23,18 @@
             <legend class="slds-form-element__label slds-text-title_bold">Advance After</legend>
 
             <div class="slds-grid slds-gutters_xx-small">
+                <div class="slds-col">
+                    <lightning-input
+                        type="number"
+                        data-validatable
+                        data-property="timeoutDays"
+                        label="Days"
+                        value={timeoutDays}
+                        min="0"
+                        step="1"
+                        onchange={handleDuration}
+                    ></lightning-input>
+                </div>
                 <div class="slds-col">
                     <lightning-input
                         type="number"
@@ -71,7 +83,7 @@
                 label="On Timeout"
                 value={timeoutAction}
                 options={actionOptions}
-                field-level-help="What the flow does when the time runs out. Go to Next Screen falls back to finishing the flow on the last screen; the other choices do nothing if the flow does not offer them."
+                field-level-help="What the flow does when the time runs out. Next falls back to finishing the flow on a last screen, so it covers that case too. Previous does nothing if the flow does not offer it."
                 onchange={handleSelect}
             ></lightning-combobox>
 
@@ -233,6 +245,18 @@
                  error mirroring and require fgrid's collectChildValidity
                  workaround for the sake of one repetition. -->
             <div class="slds-grid slds-gutters_xx-small">
+                <div class="slds-col">
+                    <lightning-input
+                        type="number"
+                        data-validatable
+                        data-property="warningDays"
+                        label="Days"
+                        value={warningDays}
+                        min="0"
+                        step="1"
+                        onchange={handleDuration}
+                    ></lightning-input>
+                </div>
                 <div class="slds-col">
                     <lightning-input
                         type="number"

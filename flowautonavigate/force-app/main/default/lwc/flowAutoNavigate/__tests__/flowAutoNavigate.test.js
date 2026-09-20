@@ -1168,3 +1168,92 @@ describe("advancing on an external trigger", () => {
         expect(events).toEqual([]);
     });
 });
+
+describe("durations of a day or more", () => {
+    function timerText(element) {
+        return element.shadowRoot.querySelector(".auto-navigate__timer").textContent;
+    }
+
+    function announcement(element) {
+        return element.shadowRoot.querySelector(".slds-assistive-text").textContent;
+    }
+
+    function buildDays({ days, hours, minutes, seconds, ...rest }) {
+        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        element.timeoutDays = days;
+        element.timeoutHours = hours;
+        element.timeoutMinutes = minutes;
+        element.timeoutSeconds = seconds;
+        element.availableActions = ["NEXT"];
+        Object.assign(element, rest);
+        document.body.appendChild(element);
+        return element;
+    }
+
+    /**
+     * The `d` suffix rather than a fourth colon segment: `3:00:00:00` and
+     * `3:00:00` differ only by segment count, which is easy to misread.
+     */
+    it.each([
+        [{ days: 3 }, "3d 00:00:00"],
+        [{ days: 2, hours: 5 }, "2d 05:00:00"],
+        [{ hours: 25 }, "1d 01:00:00"],
+        [{ hours: 24 }, "1d 00:00:00"],
+        [{ days: 1, hours: 2, minutes: 3, seconds: 4 }, "1d 02:03:04"]
+    ])("renders %j as %s", async (config, expected) => {
+        const element = buildDays({ ...config, showTimer: true });
+        await Promise.resolve();
+        expect(timerText(element)).toBe(expected);
+    });
+
+    /** Below a day nothing changes, so existing screens look the same. */
+    it.each([
+        [{ hours: 23, minutes: 59 }, "23:59:00"],
+        [{ minutes: 90 }, "1:30:00"],
+        [{ minutes: 1, seconds: 5 }, "1:05"]
+    ])("leaves %j unchanged as %s", async (config, expected) => {
+        const element = buildDays({ ...config, showTimer: true });
+        await Promise.resolve();
+        expect(timerText(element)).toBe(expected);
+    });
+
+    it("carries days into the hours box rather than rolling over", async () => {
+        // 48 in Hours is still two days; boxes are summed, not a clock reading.
+        const element = buildDays({ hours: 48, showTimer: true });
+        await Promise.resolve();
+        expect(timerText(element)).toBe("2d 00:00:00");
+    });
+
+    it("counts down across a day boundary", async () => {
+        const element = buildDays({ days: 1, seconds: 1, showTimer: true });
+        await Promise.resolve();
+        expect(timerText(element)).toBe("1d 00:00:01");
+
+        elapse(2_000);
+        await Promise.resolve();
+        expect(timerText(element)).toBe("23:59:59");
+    });
+
+    it("announces days in words", async () => {
+        const element = buildDays({ days: 2, hours: 3 });
+        await Promise.resolve();
+        expect(announcement(element)).toBe("This screen advances in 2 days 3 hours.");
+    });
+
+    it("singularizes one day", async () => {
+        const element = buildDays({ days: 1 });
+        await Promise.resolve();
+        expect(announcement(element)).toBe("This screen advances in 1 day.");
+    });
+
+    it("still fires at the right moment", () => {
+        const element = buildDays({ days: 1 });
+        const events = captureEvents(element);
+
+        elapse(86_400_000 - TICK_MS);
+        expect(events).toEqual([]);
+
+        elapse(TICK_MS);
+        expect(types(events)).toContain(NEXT);
+    });
+});
