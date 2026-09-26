@@ -1,5 +1,5 @@
 node_modules/
-vendor/
+crlabs/flow-config-editor-kit/
 .sfdx/
 .sf/
 coverage/
