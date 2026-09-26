@@ -236,7 +236,7 @@ describe("header", () => {
         expect(element.shadowRoot.querySelector("p").textContent).toContain("1 item •");
     });
 
-    it("paints the object icon badge with the theme colour", async () => {
+    it("paints the object icon badge with the theme color", async () => {
         const element = build({ showHeader: true, showObjectIcon: true });
         emitAll();
         await Promise.resolve();

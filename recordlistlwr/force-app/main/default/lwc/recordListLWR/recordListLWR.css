@@ -1,5 +1,5 @@
 /* Phase 1 keeps styling to the SLDS defaults. The property panel that exposes the
-   standard component's colour, padding and border options is phase 6 — these rules
+   standard component's color, padding and border options is phase 6 — these rules
    are only what the layout needs to stand up. No width properties: the LWR property
    panel breaks if a component sets its own width. */
 
@@ -13,8 +13,8 @@
     border-bottom: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
 }
 
-/* The coloured square behind the object icon, matching the standard component.
-   The colour is the theme's hex, applied inline from getObjectInfo. */
+/* The colored square behind the object icon, matching the standard component.
+   The color is the theme's hex, applied inline from getObjectInfo. */
 .record-list__icon {
     display: inline-flex;
     align-items: center;

@@ -48,7 +48,7 @@ export default class RecordListLWR extends NavigationMixin(LightningElement) {
      * They are declared false here because LWC requires it (LWC1099: a boolean
      * public property must default to false) — the metadata default is what an
      * Experience Builder instance actually gets. Unlike Flow Builder, which drops
-     * false input parameters and forces negative naming, Experience Builder honours
+     * false input parameters and forces negative naming, Experience Builder honors
      * the metadata default, so these can stay positively named.
      *
      * Consequence for Single Component Live Preview: there is no property panel, so
@@ -100,7 +100,7 @@ export default class RecordListLWR extends NavigationMixin(LightningElement) {
      * optional `-` prefix for descending. A plain string is accepted and then
      * silently ignored — the header flips, the rows do not move. The code example on
      * the same page passes an array of qualified names, and that is the shape the
-     * wire honours. The response echoes the sortBy it actually applied, which is how
+     * wire honors. The response echoes the sortBy it actually applied, which is how
      * this was settled rather than guessed; the diagnostics panel shows both.
      */
     sortBy = null;
@@ -399,7 +399,7 @@ export default class RecordListLWR extends NavigationMixin(LightningElement) {
     // ---------------------------------------------------------------------------
     // DIAGNOSTICS, off by default, toggled from the property panel.
     //
-    // Kept in the shipped component on purpose. Runtime behaviour in an LWR site
+    // Kept in the shipped component on purpose. Runtime behavior in an LWR site
     // has already differed from both the docs and from Node twice — most sharply
     // when records arrived carrying nothing but `id` and rendered as blank rows
     // with no error anywhere. Reading the component's actual state beats inferring
