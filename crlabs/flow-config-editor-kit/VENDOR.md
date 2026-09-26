@@ -1,7 +1,12 @@
 # Vendored: Flow Config Editor Kit
 
+**This is third-party code, not ours.** It lives under `crlabs/` because a
+`crlabs`-namespaced package is built from it, not because we own it. Treat it as a
+vendored dependency: fixes go upstream, and the tree stays diffable.
+
 Upstream: https://github.com/RebbePod/flow-config-editor-kit
 License: Apache-2.0 (see `LICENSE`, `NOTICE`)
+Copyright: Fast Track Digital
 
 ## Pinned commit
 
@@ -9,6 +14,11 @@ License: Apache-2.0 (see `LICENSE`, `NOTICE`)
 1377405378f2fddb8534666fd9c6adb0cbbebcf1
 2026-08-26  feat: offer Collection Filter and Collection Sort outputs as resources (#23)
 ```
+
+The skill's `reference/UPSTREAM_SHA` and `flowgrid/STATUS.md` record `6443e41`
+instead. That commit is an **ancestor** of this one and their `force-app` trees are
+identical — the commits between touched only docs and CI — so the records disagree on
+id but describe the same shippable source.
 
 Upstream has no tagged releases. Version in its `package.json` is `0.1.0` (unreleased).
 
@@ -34,7 +44,7 @@ To refresh: re-clone at the new SHA, replace `force-app/`, update the SHA above.
 ## Deploy
 
 ```bash
-sf project deploy start -d vendor/flow-config-editor-kit/force-app -o "Preview Org"
+sf project deploy start -d crlabs/flow-config-editor-kit/force-app -o "Preview Org"
 sf org assign permset --name Flow_Config_Editor_Access -o "Preview Org"
 ```
 
@@ -44,8 +54,23 @@ either, but the permission set is part of the kit's supported install.
 
 ## Fork patches
 
-**None. The tree is byte-identical to the pinned commit**, which is how it should stay
-— a clean tree is diffable against upstream and costs nothing to re-pin.
+**One, awaiting merge upstream.** A clean tree is diffable against upstream and costs
+nothing to re-pin, so this should return to none.
+
+### Popover anchoring while an ancestor scrolls — contributed as PR #25, OPEN
+
+A picker popover detached from its field when an ancestor scrolled. Patched locally
+across `flowConfigPopoverUtils`, `flowConfigFieldPicker`, `flowConfigObjectPicker` and
+`flowConfigResourcePicker` (6 files, +174/-9, tests included) and contributed as
+<https://github.com/RebbePod/flow-config-editor-kit/pull/25>.
+
+**WHEN IT MERGES**: re-pin to the merged commit and delete this section. #23 went the
+same way and the merged version came back better than what was contributed — see the
+history below.
+
+This matters beyond tidiness now that the kit is packaged: Apache-2.0 §4(b) requires
+modified files to carry notices stating they were changed, so shipping a package built
+from this tree means shipping a declared fork. Waiting for the merge avoids that.
 
 ### History: the Collection Filter gap, contributed and merged
 

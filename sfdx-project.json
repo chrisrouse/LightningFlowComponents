@@ -25,7 +25,7 @@
             "default": false
         },
         {
-            "path": "vendor/flow-config-editor-kit/force-app",
+            "path": "crlabs/flow-config-editor-kit/force-app",
             "default": false
         },
         {

@@ -9,7 +9,7 @@ module.exports = {
         "**/flowgrid/**/__tests__/**/*.test.js",
         "**/recordlistlwr/**/__tests__/**/*.test.js",
         "**/flowautonavigate/**/__tests__/**/*.test.js",
-        "**/vendor/flow-config-editor-kit/**/__tests__/**/*.test.js"
+        "**/crlabs/flow-config-editor-kit/**/__tests__/**/*.test.js"
     ],
     moduleNameMapper: {
         ...jestConfig.moduleNameMapper,

@@ -2,7 +2,7 @@ const eslintJs = require("@eslint/js");
 const salesforceLwcConfig = require("@salesforce/eslint-config-lwc/recommended");
 
 module.exports = [
-    { ignores: ["node_modules/**", "vendor/**", "**/__tests__/**/data/**"] },
+    { ignores: ["node_modules/**", "crlabs/flow-config-editor-kit/**", "**/__tests__/**/data/**"] },
     eslintJs.configs.recommended,
     ...(Array.isArray(salesforceLwcConfig) ? salesforceLwcConfig : [salesforceLwcConfig]),
     {
