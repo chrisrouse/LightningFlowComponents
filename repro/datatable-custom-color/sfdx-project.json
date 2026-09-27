@@ -1,0 +1,7 @@
+{
+    "packageDirectories": [{ "path": "force-app", "default": true }],
+    "name": "datatable-custom-color-repro",
+    "namespace": "",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "67.0"
+}

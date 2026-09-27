@@ -1,0 +1,56 @@
+<template>
+    <article class="slds-card">
+        <div class="slds-card__header">
+            <h2 class="slds-text-heading_small">Repro: Datatable Custom Color</h2>
+            <p class="slds-text-body_small">
+                Build {build} · stylesheet:
+                <template lwc:if={stylesLoaded}>loaded</template>
+                <template lwc:elseif={styleError}>FAILED — {styleError}</template>
+                <template lwc:else>loading</template>
+            </p>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+            <div class="slds-grid slds-gutters slds-m-bottom_small">
+                <div class="slds-col">
+                    <lightning-input
+                        type="color"
+                        label="Fill 0 (rows 1 and 3)"
+                        value={fill0}
+                        onchange={handleFill0}
+                    ></lightning-input>
+                    <p class="slds-text-body_small">Value {fill0} · text {onColor0}</p>
+                </div>
+                <div class="slds-col">
+                    <lightning-input
+                        type="color"
+                        label="Fill 1 (row 2)"
+                        value={fill1}
+                        onchange={handleFill1}
+                    ></lightning-input>
+                    <p class="slds-text-body_small">Value {fill1} · text {onColor1}</p>
+                </div>
+            </div>
+
+            <ol class="slds-list_ordered slds-text-body_small slds-m-bottom_small">
+                <li>Rows 1–3 take the picked colors in every column → properties reach the cells.</li>
+                <li>Pick a new color → the rows change at once.</li>
+                <li>Pick a dark and a light color → the text flips white/black and stays readable.</li>
+                <li>The warning icon in the last column matches the text color.</li>
+                <li>Hover and click a colored cell → the text reverts to normal, as in Flow Grid.</li>
+                <li>Open a picker → note whether a Default swatch tab exists, or only Custom.</li>
+            </ol>
+
+            <div class="reproCC" style={colorVars}>
+                <div class="reproMarker slds-p-around_xx-small slds-m-bottom_x-small slds-text-body_small">
+                    A dashed purple border here means the global stylesheet reached this component.
+                </div>
+                <lightning-datatable
+                    key-field="id"
+                    columns={columns}
+                    data={rows}
+                    hide-checkbox-column
+                ></lightning-datatable>
+            </div>
+        </div>
+    </article>
+</template>

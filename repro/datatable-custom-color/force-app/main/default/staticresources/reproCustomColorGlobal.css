@@ -1,0 +1,49 @@
+/* Probe. Fixed class names, colors supplied at runtime as custom
+   properties on a wrapper in the probe's own template. If a cell turns
+   the picked color, the property crossed into lightning-datatable's
+   shadow root and the approach works on this surface.
+
+   Build marker: rcc-2026-09-27b */
+
+.reproCC .reproColor_0 {
+    background-color: var(--repro-color-0);
+    color: var(--repro-color-0-on);
+}
+.reproCC .reproColor_1 {
+    background-color: var(--repro-color-1);
+    color: var(--repro-color-1-on);
+}
+.reproCC .reproColorText_0 {
+    color: var(--repro-color-0);
+}
+
+/* The real grid's hover and focus rule, unchanged: the background loses
+   to the row hover, so the text reverts to the ordinary color. */
+.reproCC .slds-table tbody tr:hover > td .reproFill,
+.reproCC .slds-table tbody tr:hover > th .reproFill,
+.reproCC .slds-table tbody tr:hover > td.reproFill,
+.reproCC .slds-table tbody tr:hover > th.reproFill,
+.reproCC .slds-table td.slds-has-focus .reproFill,
+.reproCC .slds-table th.slds-has-focus .reproFill,
+.reproCC .slds-table td.slds-has-focus.reproFill,
+.reproCC .slds-table th.slds-has-focus.reproFill {
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+/* Visible proof the stylesheet itself loaded, independent of the
+   custom properties: the marker strip turns dashed purple. */
+.reproCC .reproMarker {
+    border: 2px dashed #9050e9;
+}
+
+/* Round b. Round a showed the url type keeping its link blue and the
+   boolean check staying gray on a colored fill: both set their own
+   color rather than inheriting. Make them follow the cell's text. */
+.reproCC .reproFill a,
+.reproCC .reproColorText_0 a {
+    color: inherit;
+}
+.reproCC .reproFill .slds-icon,
+.reproCC .reproColorText_0 .slds-icon {
+    fill: currentColor;
+}
