@@ -54,8 +54,9 @@ either, but the permission set is part of the kit's supported install.
 
 ## Fork patches
 
-**One, awaiting merge upstream.** A clean tree is diffable against upstream and costs
-nothing to re-pin, so this should return to none.
+**Two.** A clean tree is diffable against upstream and costs nothing to re-pin, so
+this should return to none. #25 is contributed; the field allow-list below is local
+only for now, and may be out of scope for upstream.
 
 ### Popover anchoring while an ancestor scrolls — contributed as PR #25, OPEN
 
@@ -71,6 +72,33 @@ history below.
 This matters beyond tidiness now that the kit is packaged: Apache-2.0 §4(b) requires
 modified files to carry notices stating they were changed, so shipping a package built
 from this tree means shipping a declared fork. Waiting for the merge avoids that.
+
+### Field picker allow-list and a relationship depth of 0 — LOCAL ONLY, not yet contributed
+
+Flow Grid's Columns picker offered every field of the object, and every relationship,
+when the records came from a Get Records that retrieves only some fields — and a Get
+Records never returns parent fields at all. A column on a field the records do not
+carry renders empty. The picker had no way to be told otherwise:
+
+- **No allow-list.** The object picker has `available-object-types`; the field picker
+  had nothing like it.
+- **`max-relationship-depth="0"` did not hide relationships.** `Number(depth || 5)`
+  turned the 0 into 5.
+
+Patched in `flowConfigFieldPicker.js` (+ 5 tests), 2026-09-27:
+
+- `@api availableFields` — an array, JSON array string or comma-separated string of
+  field paths. Empty offers everything, so every existing consumer is unchanged. A
+  relationship is offered only when an allowed path runs through it (`Owner.Name`
+  shows Owner, with only Name inside).
+- `maxRelationshipDepth` of 0 now means no traversal; blank or invalid still means 5.
+
+Flow Grid passes both from `fgrid_propertyControls`, derived by `c/fgrid_recordSource`.
+The modified file carries a notice at its top, per Apache-2.0 §4(b).
+
+**IF CONTRIBUTED AND MERGED**: re-pin and delete this section. **IF UPSTREAM DECLINES**:
+it stays a documented fork patch here; the re-pin procedure then has to re-apply it,
+which is what the notice and the tests are for.
 
 ### History: the Collection Filter gap, contributed and merged
 
