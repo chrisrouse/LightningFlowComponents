@@ -37,6 +37,13 @@ const DISPLAY_DEFAULTS = {
     warningTintProgressBar: false,
     warningStyle: "Color and Weight",
     timerDirection: DIRECTION_DOWN,
+    timerStyle: "Text",
+    fillDirection: "Match Timer",
+    ringSize: "Medium",
+    // Salesforce brand blue, and the SLDS error red for the warning. Must match the component.
+    fillColor: "#0176D3",
+    textColor: "#0176D3",
+    warningColor: "#BA0517",
     timeoutAction: "Next",
     timeFormat: "Standard",
     messagePosition: "Below"
@@ -48,6 +55,13 @@ const DISPLAY_DEFAULTS = {
  * them — sending it breaks Flow Builder's element factory on save.
  */
 const NUMBER_DATA_TYPE = "Number";
+
+/** A saved or picked Flow reference, as the value inputs display it: `{!Resource}`. */
+const REFERENCE_PATTERN = /^\{!.+\}$/;
+
+function isFlowReference(value) {
+    return typeof value === "string" && REFERENCE_PATTERN.test(value.trim());
+}
 
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
@@ -87,6 +101,9 @@ function humanizeSeconds(totalSeconds) {
 }
 
 export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
+    /** Bump this with each deploy so the panel shows which build it loaded. */
+    buildMarker = "Build 2026-10-28 overrun";
+
     /**
      * Open on load. Only the duration is needed for a working configuration,
      * so the rest start collapsed rather than making the panel a long scroll.
@@ -167,6 +184,27 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         return this.resolve("timeoutSeconds");
     }
 
+    /** Tells a duration box whether it holds a typed number or a resource. */
+    durationDataType(name) {
+        return isFlowReference(this.resolve(name)) ? "reference" : NUMBER_DATA_TYPE;
+    }
+
+    get timeoutDaysDataType() {
+        return this.durationDataType("timeoutDays");
+    }
+
+    get timeoutHoursDataType() {
+        return this.durationDataType("timeoutHours");
+    }
+
+    get timeoutMinutesDataType() {
+        return this.durationDataType("timeoutMinutes");
+    }
+
+    get timeoutSecondsDataType() {
+        return this.durationDataType("timeoutSeconds");
+    }
+
     get showTimer() {
         return Boolean(this.resolve("showTimer"));
     }
@@ -209,7 +247,8 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
             // a label never touches a saved flow.
             { label: "Next", value: "Next" },
             { label: "Previous", value: "Back" },
-            { label: "Stay on This Screen", value: "Stay" }
+            { label: "Stay on This Screen", value: "Stay" },
+            { label: "Overrun on This Screen", value: "Overrun" }
         ];
     }
 
@@ -231,7 +270,33 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         return this.resolve("warningSeconds");
     }
 
+    get warningDaysDataType() {
+        return this.durationDataType("warningDays");
+    }
+
+    get warningHoursDataType() {
+        return this.durationDataType("warningHours");
+    }
+
+    get warningMinutesDataType() {
+        return this.durationDataType("warningMinutes");
+    }
+
+    get warningSecondsDataType() {
+        return this.durationDataType("warningSeconds");
+    }
+
+    /** As `durationBound`, for the warning boxes. */
+    get warningBound() {
+        return WARNING_PROPERTIES.some((name) => isFlowReference(this.resolve(name)));
+    }
+
     get warningSummary() {
+        if (this.warningBound) {
+            return this.warningTotalSeconds > 0
+                ? `Warns ${humanizeSeconds(this.warningTotalSeconds)} plus the bound values before advancing.`
+                : "Warns by the bound values before advancing.";
+        }
         if (this.warningTotalSeconds <= 0) {
             return "No warning phase.";
         }
@@ -240,7 +305,7 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
 
     get warningSummaryClass() {
         const base = "duration__summary slds-text-body_small slds-m-top_xx-small";
-        return this.warningTotalSeconds > 0 ? base : `${base} slds-text-color_weak`;
+        return this.warningTotalSeconds > 0 || this.warningBound ? base : `${base} slds-text-color_weak`;
     }
 
     get warningStyle() {
@@ -338,6 +403,62 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         return this.inputDataType("timerLabel", null);
     }
 
+    /* ---- Style ---- */
+
+    get timerStyle() {
+        return this.resolve("timerStyle");
+    }
+
+    get timerStyleOptions() {
+        return [
+            { label: "Text", value: "Text" },
+            { label: "Ring", value: "Ring" },
+            { label: "Bar", value: "Bar" },
+            { label: "Pill", value: "Pill" }
+        ];
+    }
+
+    get fillDirection() {
+        return this.resolve("fillDirection");
+    }
+
+    get fillDirectionOptions() {
+        return [
+            { label: "Match Timer Direction", value: "Match Timer" },
+            { label: "Drain", value: "Drain" },
+            { label: "Fill", value: "Fill" }
+        ];
+    }
+
+    get ringSize() {
+        return this.resolve("ringSize");
+    }
+
+    get ringSizeOptions() {
+        return [
+            { label: "Small", value: "Small" },
+            { label: "Medium", value: "Medium" },
+            { label: "Large", value: "Large" }
+        ];
+    }
+
+    get fillColor() {
+        return this.resolve("fillColor");
+    }
+
+    get textColor() {
+        return this.resolve("textColor");
+    }
+
+    get warningColor() {
+        return this.resolve("warningColor");
+    }
+
+    /** Unset means the Warning Color, so the overrun follows it until someone picks one. */
+    get overrunColor() {
+        return this.resolve("overrunColor") || this.warningColor;
+    }
+
     get directionOptions() {
         return [
             { label: "Count Down to Zero", value: DIRECTION_DOWN },
@@ -358,6 +479,15 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         }, 0);
     }
 
+    /**
+     * True when any duration box holds a resource. Its value only exists at
+     * runtime, so the total here counts the typed boxes alone and the editor
+     * cannot judge the whole duration.
+     */
+    get durationBound() {
+        return DURATION_PROPERTIES.some((name) => isFlowReference(this.resolve(name)));
+    }
+
     get totalSeconds() {
         return this.sumSeconds(DURATION_PROPERTIES);
     }
@@ -367,14 +497,17 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
     }
 
     get durationSummary() {
-        return this.totalSeconds > 0
-            ? `Advances after ${humanizeSeconds(this.totalSeconds)}.`
-            : "Enter how long the screen should wait before advancing.";
+        if (this.durationBound) {
+            return this.totalSeconds > 0
+                ? `Advances after ${humanizeSeconds(this.totalSeconds)} plus the bound values.`
+                : "Advances after the bound values.";
+        }
+        return this.totalSeconds > 0 ? `Advances after ${humanizeSeconds(this.totalSeconds)}.` : "";
     }
 
     get durationSummaryClass() {
         const base = "duration__summary slds-text-body_small slds-m-top_xx-small";
-        return this.totalSeconds > 0 ? base : `${base} slds-text-color_weak`;
+        return this.totalSeconds > 0 || this.durationBound ? base : `${base} slds-text-color_weak`;
     }
 
     /* ------------------------------------------------------------------ *
@@ -390,9 +523,24 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
      * literal as text and coerces it against the declared Integer property.
      */
     handleDuration(event) {
-        const property = event.target.dataset.property;
-        const raw = event.target.value;
+        this.commitCount(event.target.dataset.property, event.target.value);
+    }
 
+    /**
+     * A duration box holds a typed number or a resource. A resource is saved as
+     * the reference itself; a typed value goes through the same rules as above.
+     */
+    handleDurationValue(event) {
+        const { name, newValue, newValueDataType } = event.detail;
+        if (newValueDataType === "reference" || isFlowReference(newValue)) {
+            this.commit(name, newValue, "reference");
+            this.clearErrors();
+            return;
+        }
+        this.commitCount(name, newValue);
+    }
+
+    commitCount(property, raw) {
         if (raw === "" || raw === null || raw === undefined) {
             this.commit(property, null, NUMBER_DATA_TYPE);
             this.clearErrors();
@@ -409,6 +557,11 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
 
     handleCheckbox(event) {
         this.commit(event.target.dataset.property, event.target.checked, "Boolean");
+    }
+
+    /** A color input's hex value, as the editor writes it. */
+    handleColor(event) {
+        this.commit(event.target.dataset.property, event.target.value, "String");
     }
 
     /** Every combobox writes a String; the property comes off the dataset. */
@@ -440,7 +593,7 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
         // A duration is only required when nothing else can complete the
         // screen. With Advance When This Is True bound, the trigger is the
         // timer, and a duration is an optional backstop.
-        if (this.totalSeconds <= 0) {
+        if (this.totalSeconds <= 0 && !this.durationBound) {
             if (this.advanceWhen) {
                 return [];
             }
@@ -450,17 +603,6 @@ export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
                 {
                     key: "timeoutSeconds",
                     errorString: "Enter a duration greater than zero, or bind Advance When This Is True."
-                }
-            ];
-        }
-
-        // A threshold at or above the total means the warning treatment is on
-        // from the first paint, which is never what someone meant by "warn".
-        if (this.warningTotalSeconds >= this.totalSeconds) {
-            return [
-                {
-                    key: "warningSeconds",
-                    errorString: `The warning must be shorter than the total duration of ${humanizeSeconds(this.totalSeconds)}.`
                 }
             ];
         }

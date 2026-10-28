@@ -23,6 +23,16 @@
             <property name="advanceWhen" type="Boolean" label="Advance When This Is True" role="inputOnly" />
             <property name="paused" type="Boolean" label="Pause Timer" role="inputOnly" />
 
+            <!-- Style: Text keeps the original text timer and progress bar. Ring,
+                 Bar and Pill replace them, and use the three colors below. -->
+            <property name="timerStyle" type="String" label="Timer Style" role="inputOnly" />
+            <property name="fillDirection" type="String" label="Fill Direction" role="inputOnly" />
+            <property name="ringSize" type="String" label="Ring Size" role="inputOnly" />
+            <property name="fillColor" type="String" label="Fill Color" role="inputOnly" />
+            <property name="textColor" type="String" label="Text Color" role="inputOnly" />
+            <property name="warningColor" type="String" label="Warning Color" role="inputOnly" />
+            <property name="overrunColor" type="String" label="Overrun Color" role="inputOnly" />
+
             <property name="showTimer" type="Boolean" label="Show Timer" role="inputOnly" />
             <property name="timerDirection" type="String" label="Timer Direction" role="inputOnly" />
             <property name="timeFormat" type="String" label="Time Format" role="inputOnly" />
@@ -59,6 +69,13 @@
                  With On Timeout set to Stay these diverge, which is what makes
                  this one usable to drive something on the same screen. -->
             <property name="timerExpired" type="Boolean" label="Timer Expired" role="outputOnly" />
+
+            <!-- Time still remaining, in the same units as the duration inputs, so a
+                 later screen can take it as its own duration without arithmetic. -->
+            <property name="timeRemainingDays" type="Integer" label="Days Remaining" role="outputOnly" />
+            <property name="timeRemainingHours" type="Integer" label="Hours Remaining" role="outputOnly" />
+            <property name="timeRemainingMinutes" type="Integer" label="Minutes Remaining" role="outputOnly" />
+            <property name="timeRemainingSeconds" type="Integer" label="Seconds Remaining" role="outputOnly" />
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

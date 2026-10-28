@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flow Auto Navigate: timer display options</title>
+<style>
+  /*
+    Palette: a cool neutral ground, one ink, and two signals. Teal means time is
+    running; red-orange means it is nearly up. Both are checked against white for
+    text contrast, so the warning never depends on the color alone.
+  */
+  :root {
+    --ground: #eceef1;
+    --panel: #ffffff;
+    --ink: #1b2026;
+    --muted: #5b6470;
+    --rule: #d5dae0;
+    --track: #dfe4ea;
+    --run: #0f5c5a;
+    --warn: #b23a1c;
+    --warn-tint: #fbe9e3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 24px 48px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    background: var(--ground);
+    color: var(--ink);
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 6px; }
+  p.lead { color: var(--muted); margin: 0 0 20px; font-size: 14px; max-width: 62ch; line-height: 1.5; }
+  .toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+  button {
+    font: inherit;
+    font-size: 14px;
+    padding: 7px 16px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  button:hover { background: var(--ink); color: var(--panel); }
+  button:focus-visible { outline: 3px solid var(--run); outline-offset: 2px; }
+  .status { font-size: 14px; color: var(--muted); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .specimen {
+    background: var(--panel);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .specimen h2 { font-size: 14px; font-weight: 600; margin: 0; color: var(--muted); }
+  .specimen .note { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5; }
+  .stage {
+    flex: 1;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  /* Ring: a thin arc around the number. */
+  .ring-wrap { position: relative; width: 168px; height: 168px; }
+  .ring-wrap svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .ring-track { stroke: var(--track); }
+  .ring-arc { stroke: var(--run); }
+  .ring-text {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 500; letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .warn .ring-arc { stroke: var(--warn); }
+  .warn .ring-text { color: var(--warn); }
+
+  /* Bar: full width, with the warning point marked on the track itself. */
+  .bar-reading { align-self: stretch; display: flex; align-items: baseline; justify-content: space-between; }
+  .bar-reading .label { font-size: 14px; color: var(--muted); }
+  .bar-reading .value { font-size: 28px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .bar {
+    position: relative; width: 100%; height: 12px;
+    background: var(--track); border-radius: 1px;
+  }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; width: 100%; height: 100%; background: var(--run); }
+  .warn .bar-fill { background: var(--warn); }
+  .bar-tick {
+    position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--ink);
+    left: calc(100% * (1 - 10 / 95));
+  }
+  .warn .bar-reading .value { color: var(--warn); }
+
+  /* Pill: the smallest treatment; the warning tints it and pulses the dot. */
+  .pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 18px; border-radius: 999px;
+    border: 1px solid var(--run);
+    color: var(--run);
+    font-size: 24px; font-weight: 500; font-variant-numeric: tabular-nums;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--run); }
+  .warn .pill { border-color: var(--warn); background: var(--warn-tint); color: var(--warn); }
+  .warn .dot { background: var(--warn); animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.6); opacity: 0.35; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .warn .dot { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Timer display options</h1>
+<p class="lead">
+  Three treatments of one countdown, a 95-second demo. Each turns to its warning state in
+  the last 10 seconds.
+</p>
+
+<div class="toolbar">
+  <button type="button" id="restart">Restart</button>
+  <span class="status" id="status" aria-live="polite">Running</span>
+</div>
+
+<div class="grid">
+
+  <section class="specimen" data-card="ring">
+    <h2>Ring</h2>
+    <div class="stage">
+      <div class="ring-wrap" role="timer" aria-label="Time remaining">
+        <svg viewBox="0 0 168 168" aria-hidden="true">
+          <circle class="ring-track" cx="84" cy="84" r="72" fill="none" stroke-width="6"></circle>
+          <circle class="ring-arc" data-arc cx="84" cy="84" r="72" fill="none" stroke-width="6"
+                  stroke-linecap="butt" stroke-dasharray="452.4"></circle>
+        </svg>
+        <div class="ring-text" data-text>1:35</div>
+      </div>
+    </div>
+    <p class="note">A thin arc around the number. Shows how much is left without competing with the screen's content.</p>
+  </section>
+
+  <section class="specimen" data-card="bar">
+    <h2>Bar</h2>
+    <div class="stage">
+      <div class="bar-reading">
+        <span class="label">Advances in</span>
+        <span class="value" data-text>1:35</span>
+      </div>
+      <div class="bar" role="timer" aria-label="Time remaining">
+        <div class="bar-fill" data-bar></div>
+        <div class="bar-tick" aria-hidden="true"></div>
+      </div>
+    </div>
+    <p class="note">Full width, so it reads across a room. The dark mark on the track is where the warning starts.</p>
+  </section>
+
+  <section class="specimen" data-card="pill">
+    <h2>Pill</h2>
+    <div class="stage">
+      <div class="pill" role="timer" aria-label="Time remaining">
+        <span class="dot" aria-hidden="true"></span>
+        <span data-text>1:35</span>
+      </div>
+    </div>
+    <p class="note">The smallest footprint, for a header or beside other content. The warning needs the tint and the pulse together to stay readable.</p>
+  </section>
+
+</div>
+
+<script>
+  const TOTAL = 95;   // demo duration, seconds
+  const WARN = 10;    // warning starts at this many seconds remaining
+
+  const cards = [...document.querySelectorAll("[data-card]")];
+  const byName = Object.fromEntries(cards.map((card) => [card.dataset.card, card]));
+  const statusEl = document.getElementById("status");
+  const RING_C = 2 * Math.PI * 72;
+  let startedAt = performance.now();
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+
+  // m:ss for a remaining time in seconds, rounding up so the first second stays up for its full length.
+  function clock(seconds) {
+    const whole = Math.ceil(seconds);
+    return `${Math.floor(whole / 60)}:${pad(whole % 60)}`;
+  }
+
+  function render(remaining) {
+    const warn = remaining <= WARN && remaining > 0;
+    const text = clock(remaining);
+
+    for (const card of cards) card.classList.toggle("warn", warn);
+
+    const ring = byName.ring;
+    ring.querySelector("[data-arc]").style.strokeDashoffset = RING_C * (1 - remaining / TOTAL);
+    ring.querySelector("[data-text]").textContent = text;
+
+    const bar = byName.bar;
+    bar.querySelector("[data-bar]").style.width = `${(remaining / TOTAL) * 100}%`;
+    bar.querySelector("[data-text]").textContent = text;
+
+    byName.pill.querySelector("[data-text]").textContent = text;
+  }
+
+  function frame(now) {
+    const elapsed = (now - startedAt) / 1000;
+    const remaining = Math.max(0, TOTAL - elapsed);
+    render(remaining);
+    if (remaining === 0) {
+      statusEl.textContent = "Advanced. Press Restart to run again.";
+      return;
+    }
+    statusEl.textContent = remaining <= WARN ? "Warning: advancing soon" : "Running";
+    requestAnimationFrame(frame);
+  }
+
+  document.getElementById("restart").addEventListener("click", () => {
+    startedAt = performance.now();
+    requestAnimationFrame(frame);
+  });
+
+  requestAnimationFrame(frame);
+</script>
+</body>
+</html>
