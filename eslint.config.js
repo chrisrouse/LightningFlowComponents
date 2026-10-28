@@ -6,7 +6,7 @@ module.exports = [
     eslintJs.configs.recommended,
     ...(Array.isArray(salesforceLwcConfig) ? salesforceLwcConfig : [salesforceLwcConfig]),
     {
-        files: ["flowgrid/**/lwc/**/*.js", "recordlistlwr/**/lwc/**/*.js", "flowautonavigate/**/lwc/**/*.js"],
+        files: ["flowgrid/**/lwc/**/*.js", "recordlistlwr/**/lwc/**/*.js", "screentimer/**/lwc/**/*.js"],
         languageOptions: { ecmaVersion: 2023, sourceType: "module" }
     },
     {

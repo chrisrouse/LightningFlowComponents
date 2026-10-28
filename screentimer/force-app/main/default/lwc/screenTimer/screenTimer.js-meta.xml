@@ -2,7 +2,7 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>67.0</apiVersion>
     <isExposed>true</isExposed>
-    <masterLabel>Flow Auto Navigate</masterLabel>
+    <masterLabel>Screen Timer</masterLabel>
     <targets>
         <target>lightning__FlowScreen</target>
     </targets>
@@ -11,7 +11,7 @@
              declares `default=`: Flow Builder re-asserts a declared default over
              whatever a custom property editor writes, which no editor-side code
              can survive. Defaults live in the component and the editor instead. -->
-        <targetConfig targets="lightning__FlowScreen" configurationEditor="c-flow-auto-navigate-editor">
+        <targetConfig targets="lightning__FlowScreen" configurationEditor="c-screen-timer-editor">
             <property name="timeoutDays" type="Integer" label="Days" role="inputOnly" />
             <property name="timeoutHours" type="Integer" label="Hours" role="inputOnly" />
             <property name="timeoutMinutes" type="Integer" label="Minutes" role="inputOnly" />

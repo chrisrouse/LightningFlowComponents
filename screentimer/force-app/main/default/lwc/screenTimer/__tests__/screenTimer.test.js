@@ -1,5 +1,5 @@
 import { createElement } from "lwc";
-import FlowAutoNavigate from "c/flowAutoNavigate";
+import ScreenTimer from "c/screenTimer";
 import { notifyRecordUpdateAvailable } from "lightning/uiRecordApi";
 
 const NEXT = "lightning__flownavigationnext";
@@ -19,7 +19,7 @@ const TICK_MS = 250;
 let now;
 
 function build({ hours, minutes, seconds, availableActions = ["NEXT"], ...rest } = {}) {
-    const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+    const element = createElement("c-screen-timer", { is: ScreenTimer });
     element.timeoutHours = hours;
     element.timeoutMinutes = minutes;
     element.timeoutSeconds = seconds;
@@ -568,7 +568,7 @@ describe("timerExpired output", () => {
     }
 
     it("reports both outputs as false up front", async () => {
-        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        const element = createElement("c-screen-timer", { is: ScreenTimer });
         const seen = [];
         element.addEventListener(ATTRIBUTE_CHANGE, (event) => {
             if (!isRemainingTick(event)) {
@@ -606,7 +606,7 @@ describe("timerExpired output", () => {
 
     it("republishes timeRemainingSeconds once per whole second, not per tick", () => {
         // Listener attached before connecting, so the starting value is seen too.
-        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        const element = createElement("c-screen-timer", { is: ScreenTimer });
         const seen = [];
         element.addEventListener(ATTRIBUTE_CHANGE, (event) => seen.push(event.detail));
         element.timeoutSeconds = 3;
@@ -1157,7 +1157,7 @@ describe("advancing on an external trigger", () => {
     it("advances immediately when the trigger is already true on load", () => {
         // Completion happens inside connectedCallback, so the listener has to
         // be attached before the element is appended or it misses everything.
-        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        const element = createElement("c-screen-timer", { is: ScreenTimer });
         element.availableActions = ["NEXT"];
         element.advanceWhen = true;
         const seen = [];
@@ -1249,7 +1249,7 @@ describe("durations of a day or more", () => {
     }
 
     function buildDays({ days, hours, minutes, seconds, ...rest }) {
-        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        const element = createElement("c-screen-timer", { is: ScreenTimer });
         element.timeoutDays = days;
         element.timeoutHours = hours;
         element.timeoutMinutes = minutes;
@@ -1330,7 +1330,7 @@ describe("durations of a day or more", () => {
 
 describe("time format", () => {
     function render(config) {
-        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        const element = createElement("c-screen-timer", { is: ScreenTimer });
         element.timeoutHours = config.hours;
         element.timeoutMinutes = config.minutes;
         element.timeoutSeconds = config.seconds;
@@ -1418,7 +1418,7 @@ describe("time format", () => {
 
 describe("message position", () => {
     function build2(rest) {
-        const element = createElement("c-flow-auto-navigate", { is: FlowAutoNavigate });
+        const element = createElement("c-screen-timer", { is: ScreenTimer });
         element.timeoutSeconds = 30;
         element.showTimer = true;
         element.timerLabel = "please wait";

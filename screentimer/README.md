@@ -1,4 +1,4 @@
-# Flow Auto Navigate
+# Screen Timer
 
 A Flow screen component that advances the screen on its own after a configured
 duration. Use it for idle timeouts, timed confirmation screens, and any screen
@@ -18,7 +18,7 @@ duration.
 ## Configuration
 
 Properties are edited through a custom property editor
-(`c-flow-auto-navigate-editor`) rather than Flow Builder's default panel: the
+(`c-screen-timer-editor`) rather than Flow Builder's default panel: the
 duration is four boxes on one row with a live plain-English summary
 ("Advances after 1 minute 5 seconds."), and the panel refuses to save a duration
 of zero.

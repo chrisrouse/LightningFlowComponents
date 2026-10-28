@@ -1,10 +1,10 @@
 import { createElement } from "lwc";
-import FlowAutoNavigateEditor from "c/flowAutoNavigateEditor";
+import ScreenTimerEditor from "c/screenTimerEditor";
 
 const INPUT_CHANGED = "configuration_editor_input_value_changed";
 
 function build({ inputVariables = [] } = {}) {
-    const element = createElement("c-flow-auto-navigate-editor", { is: FlowAutoNavigateEditor });
+    const element = createElement("c-screen-timer-editor", { is: ScreenTimerEditor });
     element.builderContext = { variables: [] };
     element.inputVariables = inputVariables;
     document.body.appendChild(element);

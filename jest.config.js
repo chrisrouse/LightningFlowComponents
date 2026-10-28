@@ -1,6 +1,6 @@
 const { jestConfig } = require("@salesforce/sfdx-lwc-jest/config");
 
-// Only Flow Grid, Record List LWR, Flow Auto Navigate and the vendored kit are
+// Only Flow Grid, Record List LWR, Screen Timer and the vendored kit are
 // under test. The UnofficialSF folders this fork is based on ship no tests and
 // are not on the rewrite path.
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
     testMatch: [
         "**/flowgrid/**/__tests__/**/*.test.js",
         "**/recordlistlwr/**/__tests__/**/*.test.js",
-        "**/flowautonavigate/**/__tests__/**/*.test.js",
+        "**/screentimer/**/__tests__/**/*.test.js",
         "**/crlabs/flow-config-editor-kit/**/__tests__/**/*.test.js"
     ],
     moduleNameMapper: {
@@ -22,6 +22,6 @@ module.exports = {
         // The shipped flowSupport stub's FlowAttributeChangeEvent takes no
         // constructor arguments, so a Flow output's attributeName and value are
         // unassertable. See the file.
-        "^lightning/flowSupport$": "<rootDir>/flowautonavigate/test/jest-mocks/lightning/flowSupport"
+        "^lightning/flowSupport$": "<rootDir>/screentimer/test/jest-mocks/lightning/flowSupport"
     }
 };

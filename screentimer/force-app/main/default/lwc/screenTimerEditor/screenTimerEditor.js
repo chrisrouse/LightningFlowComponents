@@ -1,5 +1,5 @@
 /**
- * Flow Auto Navigate — custom property editor.
+ * Screen Timer — custom property editor.
  *
  * Uses the imperative side of the Flow Config Editor Kit rather than
  * `static flowProperties`, for the same reason `fgrid_flowGridEditor` does: the
@@ -100,10 +100,7 @@ function humanizeSeconds(totalSeconds) {
     return parts.join(" ");
 }
 
-export default class FlowAutoNavigateEditor extends FlowConfigEditorBase {
-    /** Bump this with each deploy so the panel shows which build it loaded. */
-    buildMarker = "Build 2026-10-28 overrun";
-
+export default class ScreenTimerEditor extends FlowConfigEditorBase {
     /**
      * Open on load. Only the duration is needed for a working configuration,
      * so the rest start collapsed rather than making the panel a long scroll.

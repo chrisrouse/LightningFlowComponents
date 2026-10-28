@@ -1,5 +1,5 @@
 /**
- * Flow Auto Navigate — advances a Flow screen after a configured duration.
+ * Screen Timer — advances a Flow screen after a configured duration.
  *
  * Timing is measured against a wall-clock deadline (`Date.now()`), never by
  * accumulating a fixed amount per interval callback. The previous version added
@@ -11,7 +11,7 @@
  *
  * The duration is entered as separate Days / Hours / Minutes / Seconds
  * properties and summed, so there is no string format for an admin to get wrong. Those are
- * written by the custom property editor, `c-flow-auto-navigate-editor`.
+ * written by the custom property editor, `c-screen-timer-editor`.
  */
 import { LightningElement, api } from "lwc";
 import {
@@ -252,7 +252,7 @@ function formatDuration(milliseconds, roundUp, format) {
     return `${minutes}:${pad(seconds)}`;
 }
 
-export default class FlowAutoNavigate extends LightningElement {
+export default class ScreenTimer extends LightningElement {
     /** Supplied by Flow; tells us which navigation actions are possible. */
     @api availableActions = [];
 

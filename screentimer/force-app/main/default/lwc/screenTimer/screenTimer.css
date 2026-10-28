@@ -110,7 +110,7 @@
 
 .auto-navigate__bar-fill {
     background: var(--auto-navigate-bar-fill, #0176d3);
-    /* MUST match TICK_MS in flowAutoNavigate.js. The component aims the bar one
+    /* MUST match TICK_MS in screenTimer.js. The component aims the bar one
        tick ahead and this interpolates across exactly that gap, so the fill
        tracks the real remaining time instead of trailing it. A longer duration
        here is what left a second of travel on the bar at 0:00. */
